@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>所見作成アプリ（調査書・指導要録）Gemini版</title>
+<style>
+:root{--bg:#f6f7f9;--sf:#fff;--tx:#1f2328;--mu:#667085;--bd:#d0d5dd;--ac:#2b6cb0;--ac2:#e8f0fa;--wn:#fff4d6;--wt:#7a5b00;--dg:#c0392b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181c;--sf:#1f2227;--tx:#e8eaed;--mu:#9aa3af;--bd:#3a3f47;--ac:#7db3f0;--ac2:#243447;--wn:#3a3216;--wt:#f0d78a;--dg:#ff7b6b}}
+:root[data-theme="dark"]{--bg:#16181c;--sf:#1f2227;--tx:#e8eaed;--mu:#9aa3af;--bd:#3a3f47;--ac:#7db3f0;--ac2:#243447;--wn:#3a3216;--wt:#f0d78a;--dg:#ff7b6b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.65 "Hiragino Sans","Yu Gothic",Meiryo,sans-serif}
+.w{max-width:1280px;margin:0 auto;padding:12px}
+h1{font-size:18px;margin:4px 0 10px}h2{font-size:16px;margin:0 0 8px}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tabs button{flex:1 1 130px}
+button,select,input,textarea{font:inherit;color:var(--tx);background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:9px 12px}
+button{cursor:pointer}button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+button.on{background:var(--ac2);border-color:var(--ac);font-weight:700}
+button.d{color:var(--dg);border-color:var(--dg)}button:disabled{opacity:.5}
+.c{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:12px}
+.r{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}
+.wn{background:var(--wn);color:var(--wt);border-radius:8px;padding:8px 10px;font-size:13px;margin:6px 0}
+.opt{display:block;border:1px solid var(--bd);border-radius:10px;padding:10px;margin:6px 0;cursor:pointer}
+.opt.on{border-color:var(--ac);background:var(--ac2)}
+.g{display:grid;grid-template-columns:230px 1fr;gap:12px}
+@media(max-width:720px){.g{grid-template-columns:1fr}}
+.sl{max-height:420px;overflow:auto;border:1px solid var(--bd);border-radius:8px}
+.si{display:flex;gap:6px;align-items:center;padding:5px 8px;border-bottom:1px solid var(--bd);cursor:pointer}
+.si.on{background:var(--ac2)}.si span{flex:1}
+textarea{width:100%;min-height:80px;resize:vertical}
+label.f{display:block;font-size:13px;color:var(--mu);margin:8px 0 2px}
+.mu{color:var(--mu);font-size:13px}a{color:var(--ac)}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%}td,th{border:1px solid var(--bd);padding:5px 7px;vertical-align:top;font-size:13px}
+.chip{min-width:46px;padding:7px 8px}.chip.has{background:var(--ac2);border-color:var(--ac)}.chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.tag{padding:1px 9px;border-radius:10px;font-size:12px;border:1px solid var(--bd)}.tag.ok{background:var(--ac2);border-color:var(--ac)}.tag.no{background:var(--wn);color:var(--wt)}
+.bar{height:10px;background:var(--bd);border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ac)}
+.big{font-size:17px;margin:6px 0}.gd{background:var(--ac2);border:1px solid var(--ac);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:16px}
+summary{cursor:pointer;padding:4px 0}.pv{margin-top:8px;font-size:14px;white-space:pre-wrap}.pv>div{border-top:1px dashed var(--bd);padding:6px 0}
+#rv{position:fixed;inset:0;z-index:50;background:var(--bg);overflow:auto;padding:max(12px,env(safe-area-inset-top,0px)) 12px 24px}
+.rvb{max-width:1150px;margin:0 auto}.rg{display:grid;grid-template-columns:1fr 1.5fr;gap:12px}@media(max-width:800px){.rg{grid-template-columns:1fr}}
+.ob{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:14px;white-space:pre-wrap}
+#pa{display:none}
+@media print{#rv{display:none!important}body>.w{display:none}#pa{display:block;color:#000;background:#fff}#pa td,#pa th{border:1px solid #000;font-size:11pt}}
+.nr input{flex:1 1 150px;min-width:120px}.nr select{padding:9px 6px}.cr{border:1px solid var(--bd);border-radius:10px;padding:6px 8px;margin:6px 0}
+.tw td,.tw th{min-width:150px}.tw td:first-child,.tw th:first-child{min-width:0}
+.stp{margin:10px 0;padding:8px 10px;border-left:4px solid var(--ac);background:var(--ac2);border-radius:6px}.stp .no{font-weight:700;color:var(--ac);margin-right:4px}.flow{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.flow span{background:var(--ac2);border:1px solid var(--ac);border-radius:16px;padding:2px 12px;font-size:14px}
+.stk{position:sticky;top:0;z-index:5;max-height:32vh;overflow:auto;padding:8px 10px;margin-bottom:10px;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.fnav{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;display:flex;gap:8px;align-items:center;background:var(--sf);border:2px solid var(--ac);border-radius:14px;padding:8px 10px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.fnav b{font-size:15px;white-space:nowrap}.fnav button{font-size:17px;padding:12px 18px;font-weight:700}
+.stk .r{margin:0}.stk .chip{min-width:38px;padding:3px 7px}
+.eg{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}.eg>*{min-width:0}@media(max-width:960px){.eg{grid-template-columns:1fr}}
+.sec{border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin:10px 0;background:var(--sf)}
+details.sec>summary{font-size:16px;font-weight:700;padding:2px 0 2px 10px;border-left:5px solid var(--ac);cursor:pointer;list-style:none}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary::after{content:"　▼ ひらく";font-size:13px;font-weight:400;color:var(--ac)}
+details.sec[open]>summary::after{content:"　▲ とじる"}
+details.sec[open]>summary{margin-bottom:10px}
+details.nt{margin:6px 0}details.nt>summary{font-size:13px;color:var(--ac);padding:2px 0}
+.sec>h3{font-size:16px;margin:0 0 8px;padding-left:10px;border-left:5px solid var(--ac)}
+.tg{display:grid;grid-template-columns:48px 1fr 1fr;gap:8px 10px;align-items:center}
+.tg .hd{font-size:13px;font-weight:700;color:var(--mu)}
+.tg .yr{font-size:18px;font-weight:700;text-align:center;background:var(--ac2);border-radius:8px;padding:8px 0}
+.tg input,.cl input,.cl select{width:100%;font-size:17px;padding:11px 12px;min-width:0}
+.tg input:focus,.cl input:focus,.cl select:focus{outline:3px solid var(--ac2);border-color:var(--ac)}
+.cl{display:grid;grid-template-columns:minmax(0,2fr) 104px minmax(0,1.3fr) 64px;gap:6px 10px;align-items:end;margin:4px 0}
+.cl .hd{font-size:13px;font-weight:700;color:var(--mu)}
+.cl.sub{border-top:1px dashed var(--bd);padding-top:8px;margin-top:10px}
+.cl .d{padding:11px 6px}
+.pvt{background:var(--ac2);border-radius:10px;padding:8px 12px;margin:10px 0 6px;font-size:15px;white-space:pre-wrap}
+@media(max-width:720px){.tg{grid-template-columns:40px 1fr}.tg .hd.h2{display:none}.tg .hd.h1{display:none}.cl{grid-template-columns:1fr 1fr}.cl .hd{display:none}.cl>:first-child{grid-column:1/-1}}
+</style></head><body>
+<div class="w">
+<h1>所見作成アプリ（調査書・指導要録）</h1>
+<div class="tabs" id="tabs"></div>
+<div id="gd"></div>
+<div id="main"></div>
+</div>
+<div id="rv" style="display:none"></div>
+<div id="pa"></div>
+<script>
+let S={key:'',model:'gemini-3.8-flash',mode:null,classes:[],cur:null,stu:null,tab:0,len:{ns:200,nt:100,os:250,yo:250}};
+const KEY='shoken_v1';
+try{const x=localStorage.getItem(KEY);if(x)S=Object.assign(S,JSON.parse(x))}catch(e){}
+S.mode='num';try{S.classes.forEach(c=>c.students.forEach(s=>{s.name=''}))}catch(e){}
+/* 一括貼り付けなどで混ざった長い・複数の語がつながった履歴は自動で消す */
+try{if(S.dl)['c','k','club','role'].forEach(k=>{if(Array.isArray(S.dl[k]))S.dl[k]=S.dl[k].filter(v=>typeof v==='string'&&v.length<=30&&!/[、，,：:\n]/.test(v))})}catch(e){}
+if(!S.model||/^gemini-(1\.5|2\.0|2\.5)-flash(-lite)?$/.test(S.model))S.model='gemini-3.8-flash';
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(window.fbLive)fbPushSoon()};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+const cls=()=>S.classes.find(c=>c.id===S.cur);
+const stu=()=>cls()?.students.find(s=>s.id===S.stu);
+const lab=s=>S.mode==='name'?`${s.no} ${s.name||''}`:`${s.no}番`;
+const renum=c=>c.students.forEach((s,i)=>s.no=i+1);
+const blank=()=>({id:uid(),no:0,name:'',y1:'',y2:'',y3:'',prev:'',ns:'',nt:'',os:'',yo:''});
+function go(t){S.tab=t;save();draw()}
+function draw(){
+ $('tabs').innerHTML=['① クラスを作る','② 所見を入れる','③ 文章を作る','④ 出力する','❓ 使い方・APIキー','📅 出席日数（進路用）'].map((n,i)=>`<button class="${S.tab===i?'on':''}" onclick="go(${i})">${n}</button>`).join('');
+ $('gd').innerHTML=S.tab===5?'':guide();[t1,t2,tGen,t3,t4,tAtt][S.tab]();
+}
+/* ① */
+function t1(){
+ const cs=S.classes;
+ $('main').innerHTML=`
+ <details class="c" ${S.classes.length?'':'open'}><summary><b>📖 このアプリでできること（はじめての方はお読みください）</b></summary>
+  <div style="margin-top:6px">1・2年のときの担任の先生が書いた<b>指導要録の所見</b>をもとに、AIが次の3種類の文章の<b>下書き</b>を作ります。</div>
+  <ul><li>奈良県の調査書：総合所見・特別活動の記録</li><li>大阪府の調査書：活動／行動の記録</li><li>3年の指導要録：総合所見（昨年度と違う表現にもできます）</li></ul>
+  <div>作った文章は、画面で読んで直せます。直したあと、Excelや印刷で出力します。進め方は上の「次にやること」の案内に従えば大丈夫です。</div>
+  <div class="wn">AIの文章は下書きです。事実と違うところがないか、必ず担任が読んで確認・修正してください。</div></details>
+ <div class="c"><h2>クラス編成</h2><div class="mu">クラス名（例：3年1組）を入れて「クラス追加」を押します。複数のクラスを作れます。名前の変更・削除もできます。</div>
+  <div class="r"><input id="cn" placeholder="クラス名（例：3年1組）"><button class="p" onclick="addC()">クラス追加</button></div>
+  <div>${cs.map(c=>`<div class="r"><b>${esc(c.name)}</b><span class="mu">${c.students.length}人</span>
+   <button onclick="renC('${c.id}')">名前変更</button><button class="d" onclick="delC('${c.id}')">削除</button></div>`).join('')||'<span class="mu">まだクラスがありません</span>'}</div></div>
+ <div class="c"><h2>生徒の表示方法</h2>
+  <label class="opt ${S.mode==='num'?'on':''}"><input type="radio" name="m" ${S.mode==='num'?'checked':''} onchange="setM('num')"> <b>出席番号だけ</b>（おすすめ）
+   <div class="mu">氏名を入力しません。出力・CSVも番号のみ。個人情報の漏えいリスクが低く、貼り付け時は番号で照合します。</div></label>
+  <div class="wn">⚠ 注意：所見文の作成時、入力した所見はAI（Google Gemini）に送信されます。氏名を入力するかどうかに関わらず、学校・教育委員会の情報管理ルールで外部AIの利用が許可されているか必ず確認してください。名前を入力する場合でも、所見本文に氏名・固有名詞（学校名など）は書かないでください。生成文は必ず担任が読んで確認・修正してから提出してください。共有をオンにしない間、データはこの端末のブラウザ内にのみ保存されます。</div>
+  </div>
+ <div class="c"><h2>文字数の目安</h2><div class="mu">AIが作る文章のおよその長さです（提出先の枠に合わせて変えてください）。ぴったりの字数にはならないので、実際の字数は③の確認画面で見て調整してください。</div><div class="r">
+  奈良 総合所見<input type="number" style="width:80px" value="${S.len.ns}" onchange="S.len.ns=+this.value;save()">
+  奈良 特別活動<input type="number" style="width:80px" value="${S.len.nt}" onchange="S.len.nt=+this.value;save()">
+  大阪<input type="number" style="width:80px" value="${S.len.os}" onchange="S.len.os=+this.value;save()">
+  指導要録<input type="number" style="width:80px" value="${S.len.yo}" onchange="S.len.yo=+this.value;save()"></div></div>
+ <div class="r"><button class="p big" onclick="go(1)" ${S.mode&&S.classes.length?'':'disabled'}>次へ：② 所見を入れる ▶</button></div>
+ <div class="mu">データ全消去（クラス・生徒・所見・文章・出席日数をすべて消します。APIキーは残ります。先にExcelで保存してください）：<button class="d" onclick="if(confirm('すべてのデータを消します。よろしいですか？')){S={key:S.key,model:S.model,mode:null,classes:[],cur:null,stu:null,tab:0,len:S.len,dl:S.dl};save();draw()}">全データ削除</button></div>
+ <div class="c"><h2>データの引っ越し・バックアップ</h2><div class="mu">入力したデータは、このブラウザの中にだけ保存されています。別のパソコンやURLへ移すとき、念のための控えにも使えます。ファイルには生徒の所見が入るので、取り扱いに注意してください（APIキーは含みません）。</div><div class="r"><button class="p" onclick="bkExport()">データを書き出す（ファイル保存）</button><label class="mu" style="cursor:pointer">ファイルから読み込む：<input type="file" accept=".json,application/json" onchange="bkImport(this)"></label></div></div>
+ ${fbCard()}`;
+}
+function addC(){const n=$('cn').value.trim();if(!n)return;const c={id:uid(),name:n,students:[]};S.classes.push(c);S.cur=S.cur||c.id;save();draw()}
+function renC(id){const c=S.classes.find(x=>x.id===id);const n=prompt('新しいクラス名',c.name);if(n){c.name=n;save();draw()}}
+function delC(id){if(!confirm('このクラスと生徒を削除しますか？'))return;S.classes=S.classes.filter(c=>c.id!==id);if(S.cur===id){S.cur=S.classes[0]?.id||null;S.stu=null}save();draw()}
+function setM(m){S.mode='num';save();draw()}
+
+/* ===== 奈良県調査書：特別活動／スポーツ・文化活動等（選択式） ===== */
+const CT={eiken:{n:'英検',org:'日本英語検定協会',nm:'実用英語技能検定',lv:['5級','4級','3級','準2級','2級','準1級','1級']},
+ kanken:{n:'漢検',org:'日本漢字能力検定協会',nm:'日本漢字能力検定',lv:['10級','9級','8級','7級','6級','5級','4級','3級','準2級','2級','準1級','1級']},
+ suken:{n:'数検',org:'日本数学検定協会',nm:'実用数学技能検定',lv:['11級','10級','9級','8級','7級','6級','5級','4級','3級','準2級','2級','準1級','1級']},
+ koh:{n:'硬筆書写',org:'日本書写技能検定協会',nm:'硬筆書写技能検定',lv:['5級','4級','3級','準2級','2級','準1級','1級']},
+ mou:{n:'毛筆書写',org:'日本書写技能検定協会',nm:'毛筆書写技能検定',lv:['5級','4級','3級','準2級','2級','準1級','1級']}};
+const DL={
+ dl_c:['学級委員','学習委員','体育委員','図書委員','保健委員','美化委員','給食委員','放送委員','文化委員','広報委員','環境委員','生活委員','選挙管理委員','生徒会本部役員','生徒会本部役員会長','生徒会本部役員副会長','生徒会本部役員書記','生徒会本部役員会計'],
+ dl_k:['国語係','社会係','数学係','理科係','音楽係','美術係','保健体育係','技術・家庭係','英語係','黒板係','配布係','掲示係','給食係','美化係','生き物係','保健係','電気係','時間割係','連絡係','レク係'],
+ dl_club:['バレーボール部','バスケットボール部','サッカー部','野球部','ソフトボール部','ソフトテニス部','テニス部','卓球部','バドミントン部','陸上競技部','水泳部','剣道部','柔道部','ハンドボール部','吹奏楽部','美術部','科学部','合唱部','放送部','書道部','家庭科部','パソコン部','演劇部','茶道部'],
+ dl_role:['キャプテン','副キャプテン','部長','副部長','主将','副主将','会計','マネージャー'],
+ dl_org:['県体育協会','市体育協会','県中学校体育連盟','県教育委員会','県','市','県バレーボール協会','市バレーボール協会','県バスケットボール協会','県サッカー協会','県陸上競技協会','県水泳連盟','県卓球協会','県バドミントン協会','県ソフトテニス連盟','県剣道連盟','県柔道連盟','県吹奏楽連盟','県合唱連盟','日本吹奏楽連盟'],
+ dl_cname:[],
+ dl_res:['優勝','準優勝','3位','2位','1位','ベスト4','ベスト8','ベスト16','金賞','銀賞','銅賞','特選','入選','最優秀賞','優秀賞','知事賞','出場']};
+function xx(s){const x=s.x=s.x||{};x.c=x.c||['','',''];x.k=x.k||['','',''];x.cert=x.cert||[];x.club=x.club||'';x.yrs=x.yrs||'3';x.role=x.role||'';x.etc=x.etc||'';x.aw=x.aw||[];x.cb=x.cb||[];return x}
+const nowFY=()=>{const d=new Date();return d.getMonth()>=3?d.getFullYear():d.getFullYear()-1};
+const z2h=t=>String(t).replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248));
+const cnKey=v=>v.replace(/第[0-9０-９]+回/g,'第#回').replace(/令和[0-9０-９]+年度/g,'令和#年度');
+const cnAdv=(v,n)=>n?v.replace(/第([0-9０-９]+)回/g,(m,d)=>'第'+(+z2h(d)+n)+'回').replace(/令和([0-9０-９]+)年度/g,(m,d)=>'令和'+(+z2h(d)+n)+'年度'):v;
+const cnList=()=>((S.dl||{}).cname||[]).map(v=>cnAdv(v,Math.max(0,nowFY()-((S.cnY||{})[v]||nowFY()))));
+const dlist=id=>id==='dl_cname'?cnList():DL[id].concat(((S.dl||{})[id.slice(3)]||[]).filter(v=>!DL[id].includes(v)&&!/[、，：]/.test(v)));
+const nAdd=(v,id,suf)=>{v=(v||'').trim();if(!v)return'';const l=dlist(id);return l.includes(v)?v:l.includes(v+suf)?v+suf:v};
+const nC=v=>nAdd(v,'dl_c','委員'),nK=v=>nAdd(v,'dl_k','係'),nB=v=>nAdd((v||'').trim().replace(/^(男子|女子)/,''),'dl_club','部');
+function rem(k,v){
+ if(k==='cname'){v=(v||'').trim();if(!v||cnList().includes(v))return;S.dl=S.dl||{};S.cnY=S.cnY||{};const key=cnKey(v);
+  S.dl.cname=(S.dl.cname||[]).filter(x=>cnKey(x)!==key);S.dl.cname.push(v);S.cnY[v]=nowFY();save();dlRef();return}
+const f={c:nC,k:nK,club:nB,role:x=>(x||'').trim(),org:anon,res:x=>(x||'').trim()}[k];v=f(v);if(!v||dlist('dl_'+k).includes(v))return;S.dl=S.dl||{};(S.dl[k]=S.dl[k]||[]).push(v);save();dlRef()}
+function dlRef(){const e=$('dls');if(e)e.innerHTML=DL_HTML()}
+function xdel(k,v){S.dl[k]=S.dl[k].filter(x=>x!==v);save();dlRef();edit()}
+function mgr(){const n={c:'委員会',k:'係',club:'部活動',role:'役職',org:'主催者',res:'成績',cname:'大会名'},
+ g=Object.keys(n).map(k=>{const l=(S.dl||{})[k]||[];if(!l.length)return'';
+  return `<div style="margin:6px 0"><b>${n[k]}</b>（${l.length}件）<div style="max-height:96px;overflow:auto;border:1px solid var(--bd,#d9e2ef);border-radius:8px;padding:4px;margin-top:3px">${l.map(v=>`<span class="tag ok" style="display:inline-block;margin:2px">${esc(v)} <a href="#" onclick="xdel('${k}',${esc(JSON.stringify(v)).replace(/'/g,'&#39;')});return false" style="text-decoration:none">×</a></span>`).join('')}</div></div>`}).join('');
+ return g?`<details style="margin-top:8px"><summary class="mu" style="cursor:pointer">あなたが入力して登録された選択肢を見る・消す（次回から▼に出ます）</summary>${g}</details>`:''}
+const CITY='奈良|大和高田|大和郡山|天理|橿原|桜井|五條|御所|生駒|香芝|葛城|宇陀';
+const anon=v=>String(v||'').trim().replace(new RegExp('('+CITY+')市','g'),'市').replace(/奈良県/g,'県');
+function awText(a){const n=anon(a.n).replace(/男子|女子/g,'').trim(),o=anon(a.o).replace(/主催$/,''),r=(a.r||'').trim();if(!n&&!o&&!r)return'';return `・${a.y}年：${o?o+'主催、':''}${n}${r}`}
+const rw=r=>'令和'+(+r===1?'元':r)+'年';
+function tkText(s){const x=xx(s);return [0,1,2].map(i=>{const a=[nC(x.c[i]),nK(x.k[i])].filter(Boolean);return a.length?`・${i+1}年：${a.join('、')}`:''}).filter(Boolean).join('\n').replace(/[0-9]/g,d=>String.fromCharCode(d.charCodeAt(0)+0xFEE0))}
+function spText(s){const x=xx(s),L=[],b=nB(x.club);
+ const cl=[{b,y:x.yrs,r:x.role}].concat((x.cb||[]).map(c=>({b:nB(c.n),y:c.y,r:c.r}))).filter(c=>c.b);
+  if(cl.length){L.push('・'+cl.map((c,i)=>i?`また、${c.y}年間${c.b}に所属していた。`:`${c.y}年間${c.b}${c.y==='3'?'において継続的に活動した':'に所属していた'}。`).join(''));cl.forEach(c=>{if((c.r||'').trim())L.push(`・${c.b}で${c.r.trim()}を務めた。`)})}
+ (()=>{const g=(x.aw||[]).map((a,i)=>({a,i,k:(anon(a.o).replace(/主催$/,'').trim()||cnKey(anon(a.n)).replace(/男子|女子/g,'').trim())})),cn={},fi={};
+  g.forEach(p=>{cn[p.k]=(cn[p.k]||0)+1;if(fi[p.k]===undefined)fi[p.k]=p.i});
+  /* 同じ主催者（同じ種類）の大会をまとめ、数の多いまとまりを先に、別のものは後ろへ。まとまりの中は1年→3年の順 */
+  g.sort((p,q)=>cn[q.k]-cn[p.k]||fi[p.k]-fi[q.k]||(+p.a.y)-(+q.a.y)||p.i-q.i).map(p=>awText(p.a)).filter(Boolean).forEach(t=>L.push(t))})();
+  (x.etc||'').split('\n').map(t=>t.trim()).filter(Boolean).forEach(t=>L.push(t.startsWith('・')?t:'・'+t));
+ x.cert.forEach(c=>{const d=CT[c.t];if(!d||!c.lv)return;const dt=c.r&&c.m?`（${rw(c.r)}${c.m}月）`:c.r?`（${rw(c.r)}）`:'';L.push(`・${d.org}主催、${d.nm}${c.lv}${dt}`)});
+ return L.join('\n').replace(/[0-9]/g,d=>String.fromCharCode(d.charCodeAt(0)+0xFEE0))}
+/* 表記の統一：学年・年数は全角算用数字（１年・３年間・２・３年時）に、数字はすべて全角に */
+const nz=t=>typeof t!=='string'?t:t.replace(/[一二三](?:[・･～〜][一二三])*(?=学?年)/g,m=>m.replace(/[一二三]/g,c=>'１２３'['一二三'.indexOf(c)])).replace(/[0-9]/g,d=>String.fromCharCode(d.charCodeAt(0)+0xFEE0));
+function val(s,k){return k==='tk'?tkText(s):k==='sp'?spText(s):nz(s[k])}
+function updPv(){const s=stu();if(!s)return;const a=$('pv_tk'),b=$('pv_sp');if(a)a.textContent=tkText(s)||'（選ぶとここに表示されます）';if(b)b.textContent=spText(s)||'（選ぶとここに表示されます）'}
+function xa(k,i,v){xx(stu())[k][i]=v;save();updPv()}
+function xs(k,v){xx(stu())[k]=v;save();updPv()}
+function awAdd(){xx(stu()).aw.push({y:'3',o:'',n:'',r:''});save();edit()}
+function awRec(i){const a=xx(stu()).aw[i];if(!a)return;rem('cname',a.n);if((a.n||'').trim()&&(a.o||'').trim()){S.cnOrg=S.cnOrg||{};S.cnOrg[cnKey(a.n.trim())]=a.o.trim()}save()}
+function cnPick(k){const v=cnList()[k];if(!v)return;const o=(S.cnOrg||{})[cnKey(v)]||'',aw=xx(stu()).aw;let t=aw.find(a=>!(a.n||'').trim());if(!t){t={y:'3',o:'',n:'',r:''};aw.push(t)}t.n=v;if(o&&!(t.o||'').trim())t.o=o;save();edit()}
+function awDel(i){xx(stu()).aw.splice(i,1);save();edit()}
+function awSet(i,k,v){xx(stu()).aw[i][k]=v;save();updPv()}
+function cbAdd(){xx(stu()).cb.push({n:'',y:'1',r:''});save();edit()}
+function cbDel(i){xx(stu()).cb.splice(i,1);save();edit()}
+function cbSet(i,k,v){xx(stu()).cb[i][k]=v;save();updPv()}
+function xcAdd(){xx(stu()).cert.push({t:'eiken',lv:'',r:'',m:''});save();edit()}
+function xcDel(i){xx(stu()).cert.splice(i,1);save();edit()}
+function xcSet(i,k,v){const c=xx(stu()).cert[i];c[k]=v;if(k==='t')c.lv='';save();k==='t'?edit():updPv()}
+function cpx(w){const s=stu(),t=w==='tk'?tkText(s):spText(s);if(!t){alert('コピーする内容がありません');return}
+ const fb=()=>{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove()};
+ navigator.clipboard?navigator.clipboard.writeText(t).catch(fb):fb();alert('コピーしました')}
+let nO={};
+function naraCard(s){
+ const x=xx(s),o=(list,cur,ph)=>`<option value="">${ph}</option>`+list.map(v=>`<option value="${esc(v)}" ${String(v)===String(cur)?'selected':''}>${esc(v)}</option>`).join('');
+ const g='<div class="tg"><span></span><span class="hd h1">委員会</span><span class="hd h2">係</span>'+[1,2,3].map(i=>`<span class="yr">${i}年</span><input list="dl_c" placeholder="委員会（▼から選ぶ／入力）" value="${esc(x.c[i-1])}" oninput="xa('c',${i-1},this.value)" onchange="rem('c',this.value)"><input list="dl_k" placeholder="係（▼から選ぶ／入力）" value="${esc(x.k[i-1])}" oninput="xa('k',${i-1},this.value)" onchange="rem('k',this.value)">`).join('')+'</div>';
+ const cr=x.cert.map((c,i)=>{const d=CT[c.t]||CT.eiken;return `<div class="cr"><div class="r" style="margin:2px 0"><select onchange="xcSet(${i},'t',this.value)">${Object.entries(CT).map(([k,v])=>`<option value="${k}" ${k===c.t?'selected':''}>${v.n}</option>`).join('')}</select>
+  <select onchange="xcSet(${i},'lv',this.value)">${o(d.lv,c.lv,'級を選ぶ')}</select>
+  <select onchange="xcSet(${i},'r',this.value)">${`<option value="">取得年</option>`+[4,5,6,7,8].map(v=>`<option value="${v}" ${String(v)===String(c.r)?'selected':''}>${rw(v)}</option>`).join('')}</select>
+  <select onchange="xcSet(${i},'m',this.value)">${`<option value="">月</option>`+[1,2,3,4,5,6,7,8,9,10,11,12].map(v=>`<option value="${v}" ${String(v)===String(c.m)?'selected':''}>${v}月</option>`).join('')}</select>
+  <button class="d" style="padding:4px 10px" onclick="xcDel(${i})">削除</button></div></div>`}).join('');
+ const cbs=x.cb.map((c,i)=>`<div class="cl sub"><div><div class="hd">ほかの部活 ${i+1}</div><input list="dl_club" placeholder="部活動（選択／入力）" value="${esc(c.n)}" oninput="cbSet(${i},'n',this.value)" onchange="rem('club',this.value)"></div><div><div class="hd">年数</div><select onchange="cbSet(${i},'y',this.value)">${['1','2','3'].map(v=>`<option value="${v}" ${String(c.y)===v?'selected':''}>${v}年間</option>`).join('')}</select></div><div><div class="hd">役職</div><input list="dl_role" placeholder="なくてもOK" value="${esc(c.r)}" oninput="cbSet(${i},'r',this.value)" onchange="rem('role',this.value)"></div><button class="d" onclick="cbDel(${i})">削除</button></div>`).join('');
+  const tot=(+x.yrs||0)+x.cb.reduce((a,c)=>a+(+c.y||0),0);
+  const aws=x.aw.map((a,i)=>`<div class="cr"><div class="r nr" style="margin:3px 0"><select onchange="awSet(${i},'y',this.value)">${['3','2','1'].map(v=>`<option value="${v}" ${String(a.y)===v?'selected':''}>${v}年</option>`).join('')}</select><input list="dl_org" placeholder="主催者（例：県体育協会）" value="${esc(a.o)}" oninput="awSet(${i},'o',this.value)" onchange="rem('org',this.value);awRec(${i})"><input list="dl_cname" placeholder="大会名（例：県中学校バレーボール春季選手権大会）" value="${esc(a.n)}" oninput="awSet(${i},'n',this.value)" onchange="awRec(${i})" style="flex:2"><input list="dl_res" placeholder="成績（例：2位）" value="${esc(a.r)}" oninput="awSet(${i},'r',this.value)" onchange="rem('res',this.value)"><button class="d" style="padding:4px 10px" onclick="awDel(${i})">削除</button></div></div>`).join('');
+  return `<div class="c"><h2 style="margin-bottom:2px">奈良県調査書：特別活動・スポーツ文化活動等の記録（選択式）</h2>
+ <div class="mu">1人ずつ入れる欄です（手順3で貼り付けた内容もここに出ます）。<details style="display:inline"><summary class="mu" style="display:inline;color:var(--ac)">入力のしかたを見る</summary><div class="mu" style="margin:4px 0">▼から選ぶか、直接入力します。入力した名前はそのまま出力され、次回から▼の選択肢にも残ります（学校ごとの呼び方でOK）。「体育」だけでも、一覧に「体育委員」があれば自動で補います。委員会も係もしていない学年は空欄でOKです。</div></details></div>
+ <div id="dls">${DL_HTML()}</div>
+ <div class="sec"><h3>① 特別活動の記録（学年ごとの委員会・係）</h3>${g}
+ <div class="pvt" id="pv_tk">${esc(tkText(s))||'（選ぶとここに表示されます）'}</div><div class="r"><button onclick="cpx('tk')">この表記をコピー</button></div></div>
+ <div class="sec"><h3>② 部活動・地域クラブ活動 <span class="mu" style="font-weight:400">（先頭の「男子」「女子」は自動で外します）</span></h3>
+ <div class="cl"><div><div class="hd">部活動</div><input list="dl_club" placeholder="部活動（選択／入力）" value="${esc(x.club)}" oninput="xs('club',this.value)" onchange="rem('club',this.value)"></div>
+  <div><div class="hd">年数</div><select onchange="xs('yrs',this.value)">${['3','2','1'].map(v=>`<option value="${v}" ${x.yrs===v?'selected':''}>${v}年間</option>`).join('')}</select></div>
+  <div><div class="hd">役職</div><input list="dl_role" placeholder="なくてもOK" value="${esc(x.role)}" oninput="xs('role',this.value)" onchange="rem('role',this.value)"></div><span></span></div>
+  ${cbs}<div class="r"><button onclick="cbAdd()">＋ 途中でやめた部活・ほかの部活を追加</button></div>
+  <div class="mu">部活をかわった生徒は、上の欄に最初の部活とその年数、このボタンで次の部活を入れます。${x.cb.length&&tot>3?'<b style="color:#b45309">※ 年数の合計が3年を超えています（同時に所属していた場合はこのままでOK）。</b>':''}</div></div>
+ <details class="sec" ${nO.aw||x.aw.length?'open':''} ontoggle="nO.aw=this.open"><summary>③ 大会・表彰（${x.aw.length}件）</summary><label class="f">大会・表彰（学年・主催者・大会名・成績を入れると、調査書の書き方に自動で整います）</label>${aws||'<div class="mu">まだありません</div>'}
+  ${cnList().length?`<div class="mu" style="margin:4px 0">いままでに入れた大会名（押すと入ります。主催者もいっしょに入ります）：<br>${cnList().map((v,k)=>`<button type="button" class="tag ok" style="cursor:pointer;border:0;margin:2px;font:inherit" onclick="cnPick(${k})">${esc(v)}</button>`).join('')}</div>`:'<div class="mu" style="margin:4px 0">大会名を入れると、ここに記録されて、次からは押すだけで入れられます。</div>'}
+  <div class="r"><button onclick="awAdd()">＋ 大会・表彰を追加</button></div>
+  <details class="nt"><summary>入力のきまりを見る</summary><div class="mu">団体競技は、本人が大会登録メンバーとして出場したものだけ入れます（賞状・証明書で確認）。「奈良市」「奈良県」などの地域名は自動で「市」「県」に直し、大会名の「男子」「女子」は外します。主催者・大会名・成績は、入力すると記録されて、次回から上の「いままでに入れた大会名」ボタンや▼から選べます。大会名の「第○回」は、翌年度（4月以降）に使うと自動で1回進んだ表記で出ます。</div></details>
+</details>
+ <details class="sec" ${nO.et||x.etc||x.cert.length?'open':''} ontoggle="nO.et=this.open"><summary>④ その他・検定（${x.cert.length}件${x.etc?'・その他あり':''}）</summary><label class="f">その他（自由入力・1行に1件。上の欄に入れにくいときだけ使います）</label>
+ <textarea style="min-height:60px" oninput="xs('etc',this.value)">${esc(x.etc)}</textarea>
+ <label class="f">検定（漢検・英検など。複数入れられます）</label>${cr||'<div class="mu">まだありません</div>'}
+ <div class="r"><button onclick="xcAdd()">＋ 検定を追加</button></div>
+</details>
+ <div class="sec"><h3>⑤ スポーツ・文化活動等の記録（できあがり）</h3>
+ <div class="pvt" id="pv_sp">${esc(spText(s))||'（選ぶとここに表示されます）'}</div><div class="r"><button onclick="cpx('sp')">この表記をコピー</button></div></div>
+ ${mgr()}<details class="nt"><summary>注意書きを見る</summary><div class="mu">※ 主催者名は「〇〇市」のように具体的な地域名を書かず「市」と書く決まりです（大会欄に自分で入力する場合は注意してください）。検定の団体名・検定名は標準的な表記で入れています。県の記入上の注意と違う場合は、④の出力後に直してください。④の「奈良県」「クラス全項目」にもこの内容が入ります。</div></details></div>`}
+function DL_HTML(){return Object.keys(DL).map(id=>`<datalist id="${id}">${dlist(id).map(v=>`<option value="${esc(v)}">`).join('')}</datalist>`).join('')}
+/* ② */
+let sel=new Set(),busy=false;
+function noCls(){return !S.mode||!S.classes.length}
+function needSetup(){$('main').innerHTML='<div class="c big">先に「① クラスを作る」で、表示方法の選択とクラスの作成をしてください。<div class="r"><button class="p" onclick="go(0)">① クラスを作る へ</button></div></div>'}
+function clsSel(){return `<select onchange="S.cur=this.value;S.stu=null;sel.clear();gsel.clear();openId=null;save();draw()">${S.classes.map(x=>`<option value="${x.id}" ${x.id===S.cur?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`}
+let showTx=false,gsel=new Set(),openId=null,mgOpen=false,bkOpen=false;
+const hasIn=s=>!!((s.y1||'').trim()||(s.y2||'').trim()),has=s=>!!(s.ns||s.nt||s.os||s.yo);
+function guide(){
+ const all=S.classes.flatMap(c=>c.students),n=all.length,nin=all.filter(hasIn).length,ng=all.filter(has).length;let m,k;
+ if(!S.mode||!S.classes.length){m='① 表示方法（番号／名前）を選び、クラスを作る';k=0}
+ else if(!n){m='② 生徒を追加する';k=1}
+ else if(nin<n){m=`② 所見を入れる（入力済み ${nin}/${n}人）`;k=1}
+ else if(!S.key){m='❓ APIキーを設定する（無料・約2分）';k=4}
+ else if(ng<n){m=`③ 文章を作る（作成済み ${ng}/${n}人）`;k=2}
+ else{m='④ 出力する（Excel・印刷）';k=3}
+ return `<div class="gd">👉 次にやること：<b>${m}</b> <button class="p" onclick="go(${k})">そこへ進む</button></div>`}
+function t2(){
+ if(noCls())return needSetup();
+ if(!cls())S.cur=S.classes[0].id;const c=cls();
+ if(!stu()&&c.students.length)S.stu=c.students[0].id;
+ $('main').innerHTML=`<div class="c"><div class="r" style="margin:0"><b>クラス：</b>${clsSel()}<span class="mu">${c.students.length}人</span><span class="mu">1人ずつ入れるときは、下の番号を押します。Excelからまとめて入れるときや、生徒の追加・削除は、このページの上の方（手順1〜3）です。</span></div>
+  <details><summary class="mu">使い方を見る</summary><div class="mu">ここでは、1・2年の担任の先生が書いた所見（指導要録）と、委員会・係・部活動などを、生徒ごとに入れます。1年か2年のどちらか片方だけでも作れます。</div><div class="flow"><span>手順1 生徒を追加</span>→<span>手順2 所見を貼る</span>→<span>手順3 委員会・係・部活動を貼る</span>→<span>1人ずつ確認・修正（上の番号）</span></div><div class="mu">Excelから貼り付ける方法です。使わずに、1人ずつ打ち込んでもかまいません。必要なところだけ使ってください。</div></details></div>
+  <div class="mu" style="margin:4px 2px 6px">▼ 生徒の追加・削除／Excelから貼り付け（必要なときだけ開く）</div>
+  <details class="c" ${mgOpen||!c.students.length?'open':''} ontoggle="mgOpen=this.open"><summary><b>👥 手順1　生徒を追加する（人数分の番号を作る）</b>${c.students.length?'':'　← まずここで生徒を追加してください'}</summary>
+  <div class="mu" style="margin:6px 0">${S.mode==='name'?'名簿の名前を1行に1人ずつ貼り付けると、上から順に出席番号がつきます。':'人数を入れると、1番から順に作ります。もう一度追加すると、続きの番号になります。'}削除は、□にチェックした人だけ（チェックした生徒を削除）／その人だけ（×）／クラス全員（全員削除）の3通りです。削除すると、番号は詰めて振り直されます。</div>
+  <div class="r">${S.mode==='name'?`<textarea id="bn" placeholder="名前を1行に1人ずつ貼り付け（Excelの名簿の列をそのまま貼れます）" style="min-height:70px"></textarea><button class="p" onclick="addN()">一括追加</button>`:`<input id="bn" type="number" min="1" placeholder="人数" style="width:100px"><button class="p" onclick="addN()">人数分を追加</button>`}</div>
+  <div class="r"><button onclick="selAll()">全選択／解除</button><button class="d" onclick="delSel()">チェックした生徒を削除</button><button class="d" onclick="delAll()">全員削除</button></div>
+  <div class="sl">${c.students.map(s=>`<label class="si"><input type="checkbox" ${sel.has(s.id)?'checked':''} onchange="tg('${s.id}')"><span>${esc(lab(s))}</span><button class="d" style="padding:1px 9px" onclick="delOne('${s.id}')">×</button></label>`).join('')||'<div class="mu" style="padding:8px">生徒がいません</div>'}</div></details>
+ ${bulkCard('')}
+ ${bulkCard('2')}
+ ${c.students.length?`<div class="c stk"><div class="r">${c.students.map(s=>`<button class="chip ${hasIn(s)?'has':''} ${s.id===S.stu?'on':''}" onclick="S.stu='${s.id}';draw()">${S.mode==='name'?esc(lab(s)):s.no}</button>`).join('')}</div></div><div id="ed"></div>`:''}
+ `;
+  if(c.students.length)edit();
+ colsEx();
+}
+function edit(){
+ const s=stu();if(!s)return;const c=cls(),i=c.students.indexOf(s);
+ const F=(k,t,h)=>`<label class="f">${t}</label><textarea oninput="setF('${k}',this.value)" style="min-height:${h}px">${esc(s[k])}</textarea>`;
+ $('ed').innerHTML=`<div class="eg"><div class="c"><div class="r"><h2 style="margin:0">${esc(lab(s))}</h2><span style="flex:1"></span><button onclick="mv(-1)" ${i?'':'disabled'}>◀ 前の人</button><button onclick="mv(1)" ${i<c.students.length-1?'':'disabled'}>次の人 ▶</button></div>
+  ${S.mode==='name'?`<label class="f">名前</label><input value="${esc(s.name)}" oninput="s_name(this.value)">`:''}
+  ${F('y1','1年の所見（前担任の指導要録から貼り付け）',90)}${F('y2','2年の所見（前担任の指導要録から貼り付け）',90)}
+  ${F('y3','3年の様子・メモ（委員会・係・部活動など。なくてもOK）',60)}
+  ${F('prev','昨年度の指導要録の文章（なくてもOK。入れると、これと違う表現で作ります）',60)}
+  <div class="mu">入力は自動で保存されます。入れ終わったら「③ 文章を作る」へ進んでください。</div></div><div>${naraCard(s)}<div class="r" style="margin:12px 0 70px;justify-content:flex-end"><button onclick="mv(-1)" ${i?'':'disabled'}>◀ 前の人</button><button class="p" onclick="mv(1)" ${i<c.students.length-1?'':'disabled'} style="font-size:17px;padding:12px 22px">次の人へ ▶</button></div></div></div>
+  <div class="fnav"><button onclick="mv(-1)" ${i?'':'disabled'}>◀ 前</button><b>${esc(lab(s))}（${i+1}/${c.students.length}）</b><button class="p" onclick="mv(1)" ${i<c.students.length-1?'':'disabled'}>次の人 ▶</button></div>`;
+}
+function mv(d){const c=cls(),i=c.students.findIndex(s=>s.id===S.stu)+d;if(c.students[i]){const y=window.scrollY;S.stu=c.students[i].id;draw();window.scrollTo(0,y);requestAnimationFrame(()=>window.scrollTo(0,y))}}
+function s_name(v){stu().name=v;save()}
+function setF(k,v){stu()[k]=v;save()}
+function addN(){const c=cls(),v=$('bn').value;
+ if(S.mode==='name'){v.split(/\n/).map(x=>x.trim()).filter(Boolean).forEach(n=>{const s=blank();s.name=n;c.students.push(s)})}
+ else{const n=Math.min(+v||0,60);for(let i=0;i<n;i++)c.students.push(blank())}
+ renum(c);save();draw()}
+function tg(id){sel.has(id)?sel.delete(id):sel.add(id)}
+function selAll(){const c=cls();sel=sel.size===c.students.length?new Set():new Set(c.students.map(s=>s.id));draw()}
+function delSel(){if(!sel.size||!confirm(sel.size+'人を削除しますか？'))return;const c=cls();c.students=c.students.filter(s=>!sel.has(s.id));if(sel.has(S.stu))S.stu=null;sel.clear();renum(c);save();draw()}
+function delOne(id){const c=cls();if(!confirm('削除しますか？'))return;c.students=c.students.filter(s=>s.id!==id);if(S.stu===id)S.stu=null;renum(c);save();draw()}
+function delAll(){if(!confirm('このクラスの生徒を全員削除しますか？'))return;cls().students=[];S.stu=null;sel.clear();save();draw()}
+
+function parseRows(t){
+ const rows=[];let f='',row=[],q=false;t=t.replace(/\r\n?/g,'\n');
+ for(let i=0;i<t.length;i++){const c=t[i];
+  if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+  else if(c==='"'&&f==='')q=true;
+  else if(c==='\t'){row.push(f);f=''}
+  else if(c==='\n'){row.push(f);rows.push(row);row=[];f=''}
+  else f+=c}
+ if(f!==''||row.length){row.push(f);rows.push(row)}
+ while(rows.length&&rows[rows.length-1].every(x=>!x.trim()))rows.pop();
+ return rows;
+}
+function parseTSV(t){return parseRows(t).map(r=>(r[0]||'').trim())}
+function bkPrev(p){const n=parseRows($('bk'+p).value).length,m=$('bkm'+p),k=cls().students.length;if(!m)return;
+ m.innerHTML=n?`${n}人分を読み取りました（このクラスは${k}人）`+(n!==k?' <b style="color:var(--dg)">← 人数が違います。貼り付け範囲か、開始番号を確認してください</b>':' ✔ 人数が合っています'):''}
+let bkO={};
+const CN={c0:'1年の委員会',k0:'1年の係',c1:'2年の委員会',k1:'2年の係',c2:'3年の委員会',k2:'3年の係',club:'部活動',role:'役職',etc:'大会・表彰など'},
+ CS={c0:'体育委員',k0:'美化係',c1:'',k1:'国語係',c2:'生徒会本部役員書記',k2:'',club:'バレーボール部',role:'副キャプテン',etc:'県大会ベスト8'};
+function colsEx(){const e=$('ce'),b=$('bt2');if(!e||!b)return;const ks=b.value.split(',');
+ e.innerHTML=`<div class="tw"><table><tr><th>Excelの列</th>${ks.map((k,i)=>`<th>${'ABCDEFGH'[i]}列：${CN[k]}</th>`).join('')}</tr><tr><td>1人目の例</td>${ks.map(k=>`<td>${esc(CS[k]||'（空欄）')}</td>`).join('')}</tr></table></div><div class="mu">上の順番どおりに、隣り合った列を並べ、見出し行は入れずに、出席番号順にコピーしてください（1行＝1人）。ない人は空欄のままでOKです。</div>`}
+function bulkCard(p){
+ const T=p==='';
+ const opts=T?`<option value="y1">1年の所見</option><option value="y2">2年の所見</option><option value="y3">3年の様子・メモ</option><option value="prev">昨年度の指導要録の文章</option>`
+ :`<optgroup label="いちばん簡単：委員会・係を1〜3年まとめて"><option value="c0,k0,c1,k1,c2,k2">委員会・係 1〜3年まとめて（6列）</option></optgroup>
+ <optgroup label="学年ごとに貼る（委員会＋係の2列）"><option value="c0,k0">1年の委員会＋係</option><option value="c1,k1">2年の委員会＋係</option><option value="c2,k2">3年の委員会＋係</option></optgroup>
+ <optgroup label="1列だけ貼る"><option value="c0">1年の委員会だけ</option><option value="k0">1年の係だけ</option><option value="c1">2年の委員会だけ</option><option value="k1">2年の係だけ</option><option value="c2">3年の委員会だけ</option><option value="k2">3年の係だけ</option></optgroup>
+ <optgroup label="部活動・大会"><option value="club,role">部活動＋役職（2列）</option><option value="club">部活動だけ</option><option value="role">部活の役職だけ</option><option value="etc">大会・表彰など</option></optgroup>`;
+ const n=cls().students.length;
+ return `<details class="c" ${bkO[p]?'open':''} ontoggle="bkO['${p}']=this.open"><summary><b>${T?'📋 手順2　1・2年の所見をExcelからまとめて貼る':'📋 手順3　委員会・係・部活動をExcelからまとめて貼る'}</b>　<span class="mu">（使わなくてもOK）</span></summary>
+ <div class="mu" style="margin:6px 0">${T?'前の担任の先生の所見がExcelにあるときに使います。1人ずつ打ち込むより早く入ります。':'委員会・係・部活動などがExcelにあるときに使います。奈良県調査書の「特別活動の記録」「スポーツ・文化活動等の記録」になります。'}</div>
+ <div class="stp"><span class="no">①</span><b>${T?'どの所見を貼りますか？':'何を貼りますか？'}</b><div class="r"><select id="bt${p}" ${T?'':'onchange="colsEx()"'}>${opts}</select></div>${T?'':'<div id="ce"></div>'}</div>
+ <div class="stp"><span class="no">②</span><b>Excelでコピーして、ここに貼り付けます</b>
+  <div class="mu">${T?'Excelで所見の列だけを、出席番号順に、上から下までコピーします（見出しの行や氏名の列は入れません）。1つのセルが1人分です。':'Excelでコピーした内容を、そのまま貼ります（Ctrl+V）。'}</div>
+  <textarea id="bk${p}" style="min-height:100px" placeholder="ここに貼り付け（Ctrl+V）" oninput="bkPrev('${p}')"></textarea><div class="mu" id="bkm${p}"></div></div>
+ <div class="stp"><span class="no">③</span><b>何番の生徒から入れますか？</b>
+  <div class="r">貼り付けた最初の行を <input id="bs${p}" type="number" min="1" value="1" style="width:70px"> 番の生徒に入れる<span class="mu">（ふつうは「1」のままでOK）</span></div></div>
+ <div class="stp"><span class="no">④</span><b>ボタンを押す</b><div class="r"><button class="p" onclick="bkApply('${p}')">反映する</button><span class="mu">反映したあと、手順4で1人ずつ確認できます。</span></div>
+  <div class="r" style="margin-top:8px"><button class="d" onclick="bkClear('${p}')">①で選んだ項目を、クラス全員分消す</button><span class="mu">貼り付けを間違えたときにやり直せます。消す前に確認が出ます。1人だけ消したいときは、手順4で本人の欄を空にしてください。</span></div></div></details>`}
+function gv(s,k){const m=/^([ck])(\d)$/.exec(k);return m?xx(s)[m[1]][+m[2]]:/^(club|role|etc)$/.test(k)?xx(s)[k]:s[k]}
+function sv(s,k,v){const m=/^([ck])(\d)$/.exec(k);if(m)xx(s)[m[1]][+m[2]]=v;else if(/^(club|role|etc)$/.test(k))xx(s)[k]=v;else s[k]=v}
+function bkClear(p){
+ const c=cls(),sel=$('bt'+p),ks=sel.value.split(','),nm=sel.selectedOptions[0].textContent.replace(/（.*$/,'');
+ const n=c.students.filter(s=>ks.some(k=>(gv(s,k)||'').trim())).length;
+ if(!n){alert(`「${nm}」は、まだ誰にも入っていません。`);return}
+ if(!confirm(`「${nm}」が入っている${n}人分を、すべて消します。元に戻せません。よろしいですか？`))return;
+ c.students.forEach(s=>ks.forEach(k=>sv(s,k,'')));
+ save();draw();alert(`${n}人分の「${nm}」を消しました。`);
+}
+function bkApply(p){
+ const c=cls(),R=parseRows($('bk'+p).value);if(!R.length){alert('貼り付け欄が空です');return}
+ const sel=$('bt'+p),ks=sel.value.split(','),nm=sel.selectedOptions[0].textContent.replace(/（.*$/,''),st=Math.max(1,+$('bs'+p).value||1)-1;
+ const tg=c.students.slice(st,st+R.length);
+ /* 1セルに「、」でつながった形式（例：学校環境委員、理科係、学校環境委員、社会係…）を、学年ごとの委員会・係に自動で振り分ける */
+ if(ks.length>1&&ks.every(k=>/^[ck]\d$/.test(k))){
+  const one=R.some(r=>String(r[0]||'').trim())&&R.every(r=>r.slice(1).every(x=>!String(x||'').trim()))&&R.some(r=>/[、，,]/.test(String(r[0]||'')));
+  if(one){
+   const yrs=[...new Set(ks.map(k=>+k[1]))].sort((a,b)=>a-b);
+   for(let i=0;i<R.length;i++){
+    const parts=String(R[i][0]||'').split(/[、，,]/).map(x=>x.trim()).filter(Boolean);
+    const o={};let yi=0;
+    parts.forEach(t=>{const kk=/係$/.test(t)?'k':'c';
+     if(o[yrs[yi]+kk]!==undefined||(kk==='c'&&o[yrs[yi]+'k']!==undefined))yi++;
+     if(yi>=yrs.length)return;
+     o[yrs[yi]+kk]=t});
+    R[i]=ks.map(k=>o[k[1]+k[0]]||'');
+   }
+  }
+ }
+ if(R.length>tg.length&&!confirm(`貼り付けは${R.length}人分ですが、入れられるのは${tg.length}人分です。余りは無視されます。続けますか？`))return;
+ const ow=tg.filter(s=>ks.some(k=>(gv(s,k)||'').trim())).length;
+ if(ow&&!confirm(`${ow}人の既存の「${nm}」が上書きされます。続けますか？`))return;
+ tg.forEach((s,i)=>ks.forEach((k,j)=>{const v=String((R[i]||[])[j]||'').trim();sv(s,k,v)}));
+ save();draw();
+ alert(`${tg.length}人分の「${nm}」を入力しました（${tg[0]?lab(tg[0]):''}〜${tg.length?lab(tg[tg.length-1]):''}）。`);
+}
+function bkExport(){const o=Object.assign({},S);delete o.key;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:'application/json'}));a.download='shoken-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove()}
+function bkImport(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>{try{const o=JSON.parse(r.result);if(!o||!Array.isArray(o.classes))throw 0;
+  if(!confirm('いまの内容を、このファイルの内容に置き換えます。よろしいですか？'))return;
+  S=Object.assign(S,o);save();draw();alert('読み込みました（クラス'+o.classes.length+'件）')}catch(e){alert('このファイルは読み込めません')}inp.value=''};
+ r.readAsText(f)}
+/* ---- Firebaseでリアルタイム共有（生徒1人ずつ同期。入力すると同じ共有コードの先生の画面にも反映） ---- */
+const FB_CFG={apiKey:"AIzaSyBiWXXXVO7LPtULm7kmPTiwOrWikBh3DO4",authDomain:"koryosyoken.firebaseapp.com",projectId:"koryosyoken",storageBucket:"koryosyoken.firebasestorage.app",messagingSenderId:"304784768535",appId:"1:304784768535:web:c029b404b9fe497587a652"}; /* 最初に指定された koryosyoken のWebアプリ設定を使用。APIキーが正しいかはFirebase通信時に確認されます。 */
+var fbLive=false,fbFirst=false,fbMe='',fbR=null,fbSync={},fbSM={},fbCloud={},fbReady={},fbSub={},fbUnsub=[],fbTimer=null,fbRT=null,fbDirty=false,fbBusy=false,fbAgain=false;
+/* プロジェクト名とAPIキーの形式を確認。キーにXXXの文字列が含まれるだけでは不正と判定しない。 */
+function fbConfigOK(c){return !!(c&&c.projectId==='koryosyoken'&&typeof c.apiKey==='string'&&/^AIza[A-Za-z0-9_-]{30,}$/.test(c.apiKey))}
+function fbCfg(){if(fbConfigOK(FB_CFG))return FB_CFG;try{const stored=JSON.parse(localStorage.getItem('shoken_fb')||'null');return fbConfigOK(stored)?Object.assign({},FB_CFG,stored):null}catch(e){return null}}
+function fbLoad(){if(fbR)return fbR;fbR=(async()=>{if(!fbCfg())throw new Error('Firebaseの設定がありません');
+ for(const u of ['app','auth','firestore'])await new Promise((ok,ng)=>{const e=document.createElement('script');e.src='https://www.gstatic.com/firebasejs/10.12.2/firebase-'+u+'-compat.js';e.onload=ok;e.onerror=()=>ng(new Error('Firebaseを読み込めません（通信を確認してください）'));document.head.appendChild(e)});
+ if(!firebase.apps.length)firebase.initializeApp(fbCfg());return firebase})();fbR.catch(()=>{fbR=null});return fbR}
+function fbBadge(m){let e=$('fbb');if(!e){e=document.createElement('div');e.id='fbb';e.style.cssText='position:fixed;left:8px;bottom:8px;z-index:9998;background:#fff;border:1px solid #cbd5e1;border-radius:10px;padding:3px 10px;font-size:12px;box-shadow:0 1px 6px rgba(0,0,0,.15)';document.body.appendChild(e)}
+ e.textContent=m;e.style.display=m?'':'none';const k=$('fbm');if(k)k.textContent=m}
+function fbErr(e){const c=e&&e.code||'';fbBadge('🔴 共有エラー');
+ alert(c==='permission-denied'?'権限がありません。Firebase側の「ルール」が古いままか、Authenticationで「匿名」が有効になっていない可能性があります。':c==='auth/operation-not-allowed'||c==='auth/configuration-not-found'?'FirebaseのAuthenticationで「匿名」ログインを有効にしてください。':c==='auth/invalid-api-key'?'FirebaseのAPIキーが無効です。koryosyokenの正しいapiKeyを設定してください。':c==='auth/popup-closed-by-user'?'ログインが閉じられました。':c==='auth/unauthorized-domain'?'このURLがFirebaseの「承認済みドメイン」に入っていません（Authentication→設定）。':'共有でエラーが出ました：'+(e&&e.message||e))}
+const lsSave=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const fbEditing=()=>{const e=document.activeElement;return !!(e&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.tagName))};
+function fbRefresh(){if(fbEditing()){fbDirty=true;return}clearTimeout(fbRT);fbRT=setTimeout(()=>{lsSave();draw()},150)}
+document.addEventListener('focusout',()=>{if(fbDirty){setTimeout(()=>{if(!fbEditing()){fbDirty=false;lsSave();draw()}},250)}});
+function fbCol(){const t=(S.team||'').trim();return t?firebase.firestore().collection('teams').doc(t).collection('classes'):null}
+async function fbStart(interactive){
+ if(fbLive)return;
+ if(!fbCfg()){if(interactive)alert('Firebaseの接続用APIキーが未設定です。GitHubの index.html 内の FB_CFG.apiKey を、Firebaseコンソールの koryosyoken プロジェクトの正しい値に変更してください。共有コードはそのまま使用できます。');return}
+ try{const t=(S.team||'').trim();if(!t){if(interactive)alert('先に「共有コード」を入れてください（同じチームの先生と同じ文字列）');return}
+  fbBadge('接続中…');const f=await fbLoad(),a=f.auth();
+  let u=await new Promise(r=>{const un=a.onAuthStateChanged(x=>{un();r(x)})});
+  if(!u){u=(await a.signInAnonymously()).user}
+  fbMe=u.email||'ゲスト';fbLive=true;fbFirst=false;fbSync={};fbSM={};fbCloud={};fbReady={};fbSub={};localStorage.setItem('shoken_fbon','1');
+  const col=fbCol();
+  fbUnsub.push(col.onSnapshot(qs=>{
+   qs.docChanges().forEach(ch=>{if(ch.type==='removed')return;const id=ch.doc.id,x=ch.doc.data();fbCloud[id]=true;fbApplyClass(id,x);if(!fbSub[id])fbWatch(id)});
+   if(!fbFirst){fbFirst=true;fbPushSoon()}fbBadge('🟢 共有中（'+fbMe+'）')},e=>{fbLive=false;fbErr(e)}));
+  fbBadge('🟢 共有中（'+fbMe+'）');draw()
+ }catch(e){fbLive=false;fbErr(e)}}
+function fbStop(){fbUnsub.forEach(u=>{try{u()}catch(e){}});fbUnsub=[];fbLive=false;fbFirst=false;localStorage.removeItem('shoken_fbon');fbBadge('');}
+function fbApplyClass(id,x){let m={};try{m=JSON.parse(x.json||'{}')}catch(e){}
+ if(fbSM[id]===x.json&&S.classes.some(k=>k.id===id))return;fbSM[id]=x.json;
+ let c=S.classes.find(k=>k.id===id);if(!c){c={id,name:x.name||'',students:[]};S.classes.push(c)}
+ const st=c.students;Object.assign(c,m,{id,students:st});
+ if(!S.mode&&x.mode)S.mode=x.mode;S.cur=S.cur||id;fbRefresh()}
+function fbWatch(id){fbSub[id]=true;
+ fbUnsub.push(fbCol().doc(id).collection('students').onSnapshot(qs=>{
+  const c=S.classes.find(k=>k.id===id);if(!c)return;let ch=false;const ss=fbSync[id]=fbSync[id]||{};
+  qs.docChanges().forEach(d=>{const sid=d.doc.id;
+   if(d.type==='removed'){delete ss[sid];const i=c.students.findIndex(s=>s.id===sid);if(i>=0){c.students.splice(i,1);ch=true}return}
+   const x=d.doc.data();if(ss[sid]===x.json)return;let st;try{st=JSON.parse(x.json)}catch(e){return}
+   st.name='';ss[sid]=x.json;const i=c.students.findIndex(s=>s.id===sid);
+   if(i>=0){if(JSON.stringify(c.students[i])===x.json)return;c.students[i]=st}else c.students.push(st);ch=true});
+  c.students.sort((a,b)=>(+a.no||0)-(+b.no||0));
+  const first=!fbReady[id];fbReady[id]=true;
+  if(ch){lsSave();fbRefresh()}if(first)fbPushSoon()},e=>{fbErr(e)}))}
+function fbPushSoon(){if(!fbLive)return;clearTimeout(fbTimer);fbTimer=setTimeout(fbPush,800)}
+async function fbPush(){if(!fbLive||!fbFirst)return;if(fbBusy){fbAgain=true;return}fbBusy=true;
+ try{const col=fbCol(),db=firebase.firestore(),ts=()=>firebase.firestore.FieldValue.serverTimestamp(),ops=[];
+  S.classes.forEach(c=>{if(fbCloud[c.id]&&!fbReady[c.id])return;
+   const meta=JSON.stringify(Object.assign({},c,{students:undefined})),cd=col.doc(c.id);
+   if(fbSM[c.id]!==meta)ops.push({f:b=>b.set(cd,{name:c.name||'',mode:S.mode||'',json:meta,by:fbMe,at:ts()}),u:()=>{fbSM[c.id]=meta}});
+   const ss=fbSync[c.id]=fbSync[c.id]||{},seen={};
+   c.students.forEach(s=>{seen[s.id]=1;const j=JSON.stringify(s);if(ss[s.id]!==j)ops.push({f:b=>b.set(cd.collection('students').doc(s.id),{json:j,no:+s.no||0,by:fbMe,at:ts()}),u:()=>{ss[s.id]=j}})});
+   Object.keys(ss).forEach(id=>{if(!seen[id])ops.push({f:b=>b.delete(cd.collection('students').doc(id)),u:()=>{delete ss[id]}})})});
+  for(let i=0;i<ops.length;i+=400){const b=db.batch(),part=ops.slice(i,i+400);part.forEach(o=>o.f(b));await b.commit();part.forEach(o=>o.u())}
+  if(ops.length)fbBadge('🟢 共有中（保存しました '+new Date().toLocaleTimeString()+'）')
+ }catch(e){fbErr(e)}
+ fbBusy=false;if(fbAgain){fbAgain=false;fbPushSoon()}}
+function fbCard(){const c=fbCfg();
+ const head='<div class="c"><h2>先生どうしでリアルタイム共有（Firebase）</h2><div class="wn">⚠ 共有をオンにすると、入力した所見などのデータがGoogleのサーバー（Firebase）に保存され、同じ共有コードの先生と常に同期されます。学校・教育委員会の情報管理ルールで許可されているか確認し、氏名は入れず番号だけの運用にしてください。APIキーは共有されません。</div>';
+
+ return head+`<div style="margin-top:8px;padding:10px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--ac2)"><b>📘 先生どうしで共有するには（ログイン不要）</b>
+<ol style="margin:6px 0 6px 1.2em;padding:0">
+<li>同じ学校の先生と<b>同じ「共有コード」</b>を決めます（下の欄に入力）。</li>
+<li>「共有を始める」を押します。<b>「🟢 共有中」</b>と出れば接続できています。</li>
+<li>あとは、クラス・生徒（出席番号）・所見などを入力するだけで、同じコードの先生の画面に<b>自動で反映</b>されます。</li></ol>
+<div class="mu"><b>共有コードは「その学校だけの合言葉」です。</b>他の学校が別のコードを使えば、データは混ざりません。コードを知っている人は誰でもデータを見られるので、<b>貴校の先生以外には教えず</b>、推測されにくい長めの文字列（例：k7x2-m9qa-r4tz）にしてください。</div>
+<div class="mu" style="margin-top:4px"><b>氏名は入力できません</b>（出席番号だけで運用します）。所見の本文にも、氏名・学校名は書かないでください。</div>
+<div class="mu" style="margin-top:4px">同じ生徒を同時に編集すると、あとから保存した内容が残ります。クラスを削除してもクラウドには反映されません（生徒の削除は反映されます）。</div></div><div class="r" style="margin-top:6px"><b>共有コード</b><input value="${esc(S.team||'')}" placeholder="例：2026-3nen（同じチームで同じ文字列）" style="width:260px" onchange="S.team=this.value.trim();save()" ${fbLive?'disabled':''}>
+ ${fbLive?'<button class="d" onclick="fbStop();draw()">共有を止める</button>':'<button class="p" onclick="fbStart(true)">共有を始める</button>'}</div>
+ <div class="mu" id="fbm">${fbLive?'🟢 共有中':'共有はオフです。'}</div><div class="mu">共有中は、クラス・生徒の入力（所見・委員会・部活動・AIの文章など）が自動で全員に反映されます。同じ生徒を同時に編集すると、あとから保存した内容になります。クラスの削除はクラウドには反映されません（生徒の削除は反映されます）。</div></div>`}
+setTimeout(()=>{if(localStorage.getItem('shoken_fbon')==='1'&&fbCfg()&&(S.team||'').trim())fbStart(false)},0);
+/* AI */
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let stopF=false;
+let curCtl=null,flMsg='',flT=null,flT0=0;
+function flRender(){const e=$('fl');if(!e)return;e.innerHTML=`<span>${flMsg}</span><span style="opacity:.75">（経過${Math.round((Date.now()-flT0)/1000)}秒）</span><button onclick="stopF=true;if(curCtl)curCtl.abort()" style="padding:4px 12px;border-radius:8px;border:0;cursor:pointer">中止</button>`}
+function flStart(m){let e=$('fl');if(!e){e=document.createElement('div');e.id='fl';e.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:9999;background:#1f3a5f;color:#fff;padding:10px 16px;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.35);max-width:92vw;display:flex;gap:12px;align-items:center;flex-wrap:wrap';document.body.appendChild(e)}
+ flMsg=m;flT0=Date.now();clearInterval(flT);flT=setInterval(flRender,1000);flRender()}
+function flShow(m){flMsg=m;flRender()}
+function flOff(){clearInterval(flT);const e=$('fl');if(e)e.remove()}
+async function callAI(p,onWait){
+ if(!S.key)throw{code:'nokey'};
+ const base=S.model||'gemini-3.8-flash';
+ const models=[base].concat(['gemini-3.7-flash','gemini-3.5-flash','gemini-3.1-flash-lite'].filter(m=>m!==base));
+ let last={code:503},gone=false;
+ const W=async(sec,msg)=>{for(let k=sec;k>0;k--){if(stopF)throw{code:'stop'};onWait&&onWait(msg+'（'+k+'秒後にもう一度試します）');await sleep(1000)}};
+ for(const m of models){
+  if(m!==base)onWait&&onWait('「'+models[models.indexOf(m)-1]+'」が'+(last.code||'?')+'で失敗→「'+m+'」で試しています…');
+  const url='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(m)+':generateContent';
+  let think=/^gemini-3/.test(m);
+  for(let t=0;t<3;t++){
+   if(stopF)throw{code:'stop'};
+   const body=JSON.stringify({contents:[{parts:[{text:p}]}],generationConfig:Object.assign({responseMimeType:'application/json',temperature:0.8},think?{thinkingConfig:{thinkingLevel:'low'}}:{})});
+   let r;const ctl=new AbortController();curCtl=ctl;const to=setTimeout(()=>ctl.abort(),45000);
+   try{r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':S.key},body,signal:ctl.signal})}
+   catch(e){clearTimeout(to);if(stopF)throw{code:'stop'};last={code:'network',message:'通信できないか、AIの応答がとても遅い状態です'};break}
+   clearTimeout(to);
+   if(r.status===429){last={code:429};if(m===base&&t<1){await W(15,'利用が集中しています');continue}break}
+   if([500,502,503,504].includes(r.status)){let mm='';try{mm=(await r.json()).error.message}catch(e){}last={code:r.status,message:mm};if(t<1){await W(5,'AIが混み合っています('+r.status+')');continue}break}
+   if(!r.ok){let mm='';try{mm=(await r.json()).error.message}catch(e){}last={code:r.status,message:mm};if(r.status===404){gone=true;break}if(r.status===400&&think){think=false;t--;continue}if(m!==base&&r.status===400)break;throw last}
+   try{const j=await r.json();const tx=(j.candidates?.[0]?.content?.parts||[]).map(x=>x.text||'').join('');const out=JSON.parse(tx.replace(/```json|```/g,'').trim());if(gone&&m!==base){S.model=m;save()}return out}
+   catch(e){last={code:'format',message:'AIの返答を読み取れませんでした'};if(t<2){await sleep(2000);continue}break}
+  }
+ }
+ throw last;
+}
+function errMsg(e){return e.code==='stop'?'中断しました。':e.code==='nokey'?'APIキーが未設定です。④で設定してください。':e.code===429?'無料枠の上限に達しました。しばらく（1日の上限なら翌日）待ってから「未作成の人だけ作成」で続きを作れます。':(e.code===400||e.code===403)?'APIキーまたはモデル名が正しくありません。④を確認してください。':([500,502,503,504,'network','format'].includes(e.code))?'AIが混み合っているか、通信が不安定です（'+e.code+'）。自動で何度か再試行しましたが作れませんでした。2〜3分ほど待って、もう一度「未作成の人だけ作成」を押してください。':'作成に失敗しました（'+(e.code||'error')+(e.message?'：'+e.message:'')+'）'}
+function mkPrompt(s,ex){const L=S.len;const ins=[ex,s.inst].filter(x=>x&&x.trim()).join('\n');return `あなたは日本の中学校の担任です。以下の情報から、調査書・指導要録の所見を書いてください。
+【1年の所見】${s.y1||'なし'}
+【2年の所見】${s.y2||'なし'}
+【3年の様子・メモ】${s.y3||'なし'}
+【特別活動の記録（委員会・係。学年ごと）】${tkText(s)||'なし'}
+【部活動・大会・検定等の記録（スポーツ・文化活動等）】${spText(s)||'なし'}
+【昨年度の指導要録の文章（これと表現・構成を変える）】${s.prev||'なし'}
+【作成時の指示（できるだけ従う。ただし入力にない事実は作らない）】${ins||'なし'}
+ルール：
+- 入力にない事実（具体的な出来事・役職・成績）は作らない。入力が少なければ一般的な表現でまとめる。
+- 常体（〜た。〜である。）。氏名・学校名は書かない。
+- 4つの文章は互いに文の構成・言い回しをできるだけ変える。
+- 1・2年の内容を踏まえ、3年間の成長が伝わるようにする。
+- 学年・年数・回数などの数字は、漢数字（一年・三年間）を使わず、全角の算用数字（１年・３年間・２・３年時）で統一して書く。「一翼」「一人一人」など数を表さない語は漢字のままでよい。
+- 委員会・係・部活動・大会・検定の記録がある場合は、その事実を所見に具体的に盛り込む（特に3年の活動）。委員会・係は学年ごとの記録なので、何年のときの活動かを取り違えない。主催団体名や「令和◯年◯月」などの細かい表記までは繰り返さなくてよい。記録にない役職・成績・大会結果は作らない。
+次のJSONのみ出力：
+{"ns":"奈良県調査書の総合所見（学習・人物・心身の概況）約${L.ns}字","nt":"奈良県の特別活動の記録（学級活動・学校行事・生徒会活動）約${L.nt}字","os":"大阪府調査書の活動/行動の記録 約${L.os}字","yo":"3年の指導要録の総合所見（3年の委員会・係・部活動・検定等の記録も踏まえる） 約${L.yo}字"}`}
+async function doGen(s,wait,ex){const r=await callAI(mkPrompt(s,ex),wait);['ns','nt','os','yo'].forEach(k=>{if(r[k])s[k]=nz(String(r[k]))});save()}
+function gtg(id){gsel.has(id)?gsel.delete(id):gsel.add(id);draw()}
+function tgO(id){openId=openId===id?null:id;draw()}
+function gAll(w){const c=cls();gsel=w==='un'?new Set(c.students.filter(s=>hasIn(s)&&!has(s)).map(s=>s.id)):(gsel.size===c.students.length?new Set():new Set(c.students.map(s=>s.id)));draw()}
+function pv(s){return `<div class="pv">${[['奈良県：総合所見','ns'],['奈良県：特別活動','nt'],['大阪府：活動/行動','os'],['指導要録（3年）','yo']].filter(x=>s[x[1]]).map(x=>`<div><span class="mu">${x[0]}（${s[x[1]].length}字）</span><div>${esc(s[x[1]])}</div></div>`).join('')}</div>`}
+function rowEd(s){
+ const F=(k,t,h)=>`<label class="f">${t}</label><textarea oninput="setF('${k}',this.value);this.nextElementSibling.textContent=this.value.length+'字'" style="min-height:${h}px">${esc(s[k])}</textarea><div class="mu">${(s[k]||'').length}字</div>`;
+ return `<div style="margin-top:6px"><label class="f">この生徒だけへの指示（なくてもOK。この生徒を作るときに使われます）</label><textarea oninput="setF('inst',this.value)" style="min-height:44px" placeholder="例：部活動のことを詳しく">${esc(s.inst||'')}</textarea>
+ ${F('ns','奈良県：総合所見',100)}${F('nt','奈良県：特別活動の記録',80)}${F('os','大阪府：活動/行動の記録',100)}${F('yo','指導要録（3年）：総合所見',100)}</div>`}
+function tGen(){
+ if(noCls())return needSetup();
+ if(!cls())S.cur=S.classes[0].id;const c=cls(),n=c.students.length,nin=c.students.filter(hasIn).length,ng=c.students.filter(has).length;
+ $('main').innerHTML=`<div class="c"><div class="r"><b>クラス：</b>${clsSel()}</div>
+  <div class="big">所見入力済み <b>${nin}</b>/${n}人　／　文章作成済み <b>${ng}</b>/${n}人</div><div class="bar"><i style="width:${n?ng/n*100:0}%"></i></div>
+  ${S.key?'':'<div class="wn">AIで文章を作るには、APIキー（無料）が必要です。<button onclick="go(4)">APIキーを設定する</button></div>'}</div>
+ <div class="c"><h2>文章を作る</h2><div class="wn">AIの文章は下書きです。事実と違うところがないか、必ず読んで確認・修正してください。</div>
+  <div class="stp"><span class="no">①</span><b>書き方の希望があれば入力（なくてもOK）</b>
+   <textarea oninput="S.instAll=this.value;S.instSel=this.value;save()" style="min-height:46px" placeholder="例：学習面を中心に。前向きな表現で。">${esc(S.instAll||'')}</textarea></div>
+  <div class="stp"><span class="no">②</span><b>だれの文章を作るか選んで押す</b>
+   <div class="r"><button class="p gb" onclick="genAll('new')" style="padding:12px 18px">▶ まだの人だけ作る（クラス全員のうち）</button><button class="gb" onclick="genAll('sel')" style="padding:12px 18px">☑ チェックした人だけ作る</button><button class="gb" onclick="genAll('all')" style="padding:12px 18px">↻ 全員作り直す</button><button class="d" onclick="stopF=true" style="padding:12px 18px">■ 中断</button></div>
+   <div class="mu">・「まだの人だけ」…文章がない人だけ作ります（作成済みは飛ばします）<br>・「チェックした人だけ」…下の一覧の□にチェックした人だけ作ります<br>・「全員作り直す」…手直しした文章も上書きします　・「中断」…いま作っている1人が終わったところで止まります</div></div>
+  <div class="mu">1人だけ作る・作り直すときは、下の一覧の「作る／作り直す」を押します。35人で5〜10分ほどかかります。作成中は、このタブを閉じないでください。</div><div id="prog" class="big"></div></div>
+ <div class="c"><h2>生徒一覧</h2><div class="mu">「所見なし」＝②で所見がまだ入っていない人／「未作成」＝文章がまだない人／「作成済み」＝文章がある人。「見る・直す」で、元の所見と見比べながら確認・修正できます。</div><div class="r"><button onclick="gAll()">全選択／解除</button><button onclick="gAll('un')">未作成の人だけチェック</button><button class="p" onclick="openRv((c.students.find(has)||c.students[0]||{}).id)">📖 文章を1人ずつ確認する</button><label><input type="checkbox" ${showTx?'checked':''} onchange="showTx=this.checked;draw()"> 文章を一覧にも表示</label></div>
+ ${c.students.map(s=>{const o=openId===s.id,t=!hasIn(s)?['no','所見なし']:has(s)?['ok','作成済み']:['no','未作成'];
+  return `<div class="c" style="margin:6px 0;padding:8px"><div class="r" style="margin:0"><input type="checkbox" ${gsel.has(s.id)?'checked':''} onchange="gtg('${s.id}')"><b>${esc(lab(s))}</b><span class="tag ${t[0]}">${t[1]}</span><span style="flex:1"></span><button class="gb" id="b_${s.id}" onclick="gen1('${s.id}')">${has(s)?'作り直す':'作る'}</button><button onclick="openRv('${s.id}')">見る・直す</button></div>${o?rowEd(s):(showTx&&has(s)?pv(s):'')}</div>`}).join('')||'<div class="mu">生徒がいません</div>'}</div>`;
+}
+let rvId=null;
+function openRv(id){if(!id)return;rvId=id;drawRv();$('rv').scrollTop=0}
+function closeRv(){rvId=null;$('rv').style.display='none';draw()}
+function rvMv(d){const c=cls(),i=c.students.findIndex(x=>x.id===rvId)+d;if(c.students[i]){rvId=c.students[i].id;drawRv();$('rv').scrollTop=0}}
+function drawRv(){
+ const c=cls(),n=c.students.length,s=c.students.find(x=>x.id===rvId);if(!s)return;const i=c.students.indexOf(s),e=$('rv');e.style.display='block';
+ const F=(k,t,h)=>`<label class="f">${t}</label><textarea oninput="setF('${k}',this.value);this.nextElementSibling.textContent=this.value.length+'字'" style="min-height:${h}px">${esc(s[k])}</textarea><div class="mu">${(s[k]||'').length}字</div>`;
+ const O=(t,v)=>v&&v.trim()?`<div class="mu">${t}</div><div class="ob">${esc(v)}</div>`:'';
+ e.innerHTML=`<div class="rvb"><div class="r" style="position:sticky;top:0;background:var(--bg);padding:6px 0;z-index:2"><b class="big">${esc(lab(s))}（${i+1}/${n}）</b><span class="tag ${has(s)?'ok':'no'}">${has(s)?'作成済み':'未作成'}</span><span style="flex:1"></span>
+  <button onclick="rvMv(-1)" ${i?'':'disabled'}>◀ 前の人</button><button onclick="rvMv(1)" ${i<n-1?'':'disabled'}>次の人 ▶</button><button class="p" id="rvgb" onclick="rvGen()">${has(s)?'この生徒を作り直す':'この生徒の文章を作る'}</button><button class="d" onclick="closeRv()">閉じる ✕</button></div>
+  <div class="mu">キーボードの ← → で前後の人へ、Escで閉じます。文章は直接直せます（自動保存）。</div>
+  <div class="rg"><div><h2>元の所見</h2>${O('1年の所見',s.y1)}${O('2年の所見',s.y2)}${O('3年の様子・メモ',s.y3)}${O('昨年度の指導要録',s.prev)}${O('委員会・係の記録（選択式）',tkText(s))}${O('部活動・大会・検定の記録（選択式）',spText(s))}${hasIn(s)?'':'<div class="mu">所見が入っていません</div>'}
+   <label class="f">この生徒だけへの指示（なくてもOK。作り直すときに使われます）</label><textarea oninput="setF('inst',this.value)" style="min-height:50px" placeholder="例：部活動のことを詳しく">${esc(s.inst||'')}</textarea></div>
+  <div><h2>作成された文章</h2>${F('ns','奈良県：総合所見',120)}${F('nt','奈良県：特別活動の記録',90)}${F('os','大阪府：活動/行動の記録',120)}${F('yo','指導要録（3年）：総合所見',120)}</div></div></div>`;
+}
+async function rvGen(){
+ const s=cls().students.find(x=>x.id===rvId);
+ if(!S.key){alert('先に「APIキー」を設定してください');return}
+ if(!hasIn(s)){alert('所見が入っていません。「② 所見を入れる」で入力してください');return}
+ if(has(s)&&!confirm('この生徒の文章を作り直します。手直しした内容も上書きされます。よろしいですか？'))return;
+ if(busy){alert('いま別の文章を作成中です。終わるまでお待ちください');return}const b=$('rvgb');b.disabled=true;b.textContent='作成中…';
+ busy=true;stopF=false;flStart('作成中…');try{await doGen(s,m=>flShow(m))}catch(e){if(e.code!=='stop')alert(errMsg(e))}busy=false;flOff();
+ drawRv();
+}
+document.addEventListener('keydown',e=>{if(!rvId)return;if(e.key==='Escape')return closeRv();if(/TEXTAREA|INPUT/.test(e.target.tagName))return;if(e.key==='ArrowLeft')rvMv(-1);if(e.key==='ArrowRight')rvMv(1)});
+async function gen1(id){
+ const s=cls().students.find(x=>x.id===id);
+ if(!S.key){alert('先に「APIキー」を設定してください');go(4);return}
+ if(!hasIn(s)){alert('先に「② 所見を入れる」で、1年か2年の所見を入れてください');return}
+ if(has(s)&&!confirm('この生徒の文章を作り直します。手直しした内容も上書きされます。よろしいですか？'))return;
+ if(busy){alert('いま別の文章を作成中です。終わるまでお待ちください');return}const b=$('b_'+id);b.disabled=true;b.textContent='作成中…';
+ busy=true;stopF=false;flStart('作成中…');try{await doGen(s,m=>flShow(m));openId=id}catch(e){if(e.code!=='stop')alert(errMsg(e))}busy=false;flOff();
+ draw();
+}
+async function genAll(mode){
+ if(busy){alert('いま文章を作成中です。終わるまでお待ちください（画面の下に状況が出ます）');return}const c=cls();
+ if(!S.key){alert('先に「APIキー」を設定してください');go(4);return}
+ const ex=mode==='sel'?S.instSel:S.instAll;
+ if(mode==='sel'&&!gsel.size){alert('下の一覧で、作りたい生徒の□にチェックを入れてください');return}
+ const t=c.students.filter(s=>hasIn(s)&&(mode==='sel'?gsel.has(s.id):(mode==='all'||!has(s))));
+ if(!t.length){alert(mode==='new'?'作る生徒がいません（所見が未入力、または全員作成済みです）':'チェックした生徒に所見が入っていません（「所見なし」の人は作れません）');return}
+ const ow=t.filter(has).length;
+ if(mode!=='new'&&ow&&!confirm(ow+'人の文章が上書きされます（手直しした内容も消えます）。よろしいですか？'))return;
+ busy=true;stopF=false;document.querySelectorAll('.gb').forEach(b=>b.disabled=true);let i=0,ok=0,fails=0,msg='';
+ const P=h=>{const e=$('prog');if(e)e.innerHTML=h};
+ flStart('準備中…');
+ for(const s of t){
+  if(stopF){msg='中断しました。';break}
+  i++;const rest=Math.max(1,Math.ceil((t.length-i+1)*10/60));
+  const head=`作成中 ${i}/${t.length}人（${lab(s)}）`;flT0=Date.now();
+  P(`作成中 <b>${i}/${t.length}</b>（${esc(lab(s))}）…あと約${rest}分`);flShow(head);
+  try{await doGen(s,m=>{flShow(head+'：'+m);P(esc(head+'：'+m))},ex);ok++;fails=0}
+  catch(e){if(e.code==='stop'){msg='中断しました。';break}msg=errMsg(e);if([429,404,'nokey',400,403].includes(e.code))break;if(++fails>=2)break;continue}
+  msg='';
+  if(i<t.length)await sleep(3000);
+ }
+ busy=false;flOff();P('');draw();alert(msg?msg+'（'+ok+'人分を作成しました）':'作成が完了しました（'+ok+'人分）。「見る・直す」で内容を確認してください。');
+}
+/* ④ */
+function t4(){
+ $('main').innerHTML=`
+ <div class="c"><h2>はじめての方へ</h2><div><b>APIキーとは？</b> AI（Google Gemini）を使うための、自分専用の「合言葉」のようなものです。無料で作れます（下の手順）。キーは最初に1回だけ貼れば、その後は貼り直し不要です。</div>
+ <div style="margin-top:6px"><b>データの保存について</b> 入力した内容は自動で、このパソコンのブラウザの中に保存されます。ブラウザを閉じても続きから使えますが、別のパソコン・別のブラウザでは見えません。④のExcelでこまめに保存してください。</div></div>
+ <div class="c"><h2>APIキーの設定</h2>
+  <label class="f">Gemini APIキー（この端末のブラウザにだけ保存されます）</label>
+  <input id="ak" type="password" style="width:100%" value="${esc(S.key)}" placeholder="AIza... から始まる文字列">
+  <label class="f">モデル名（通常はそのままでOK）</label>
+  <input id="am" style="width:100%" value="${esc(S.model)}">
+  <div class="r"><button class="p" onclick="S.key=$('ak').value.trim();S.model=$('am').value.trim()||'gemini-3.8-flash';save();$('at').textContent='保存しました'">保存</button>
+  <button onclick="testK()">接続テスト</button><button onclick="speedTest()">モデル速度テスト</button><button class="d" onclick="S.key='';save();draw()">キーを削除</button><span class="mu" id="at"></span></div>
+  <div class="wn" style="margin-top:10px"><b>文章づくりがなかなか進まないときは</b><br>
+  AIは、時間帯や混み具合によって返事が遅くなることがあります。1人に1分以上かかる、「応答が遅い」「別のAIモデルに切り替え」と何度も出る、というときは次の手順を試してください。<ol style="margin:6px 0 0 1.2em;padding:0">
+  <li>作成中なら「中止」を押します。</li>
+  <li>上の「モデル速度テスト」を押して、結果が出るまで待ちます（遅いモデルは自動で飛ばします）。</li>
+  <li>一番速いモデル名が「モデル名」の欄に自動で入るので、「保存」を押します。</li>
+  <li>「③文章を作る」にもどり、「未作成の人だけ作る」を押します（作成済みの人は飛ばされます）。</li></ol>
+  <span class="mu">※ テストは毎回する必要はありません。保存したモデル名はこのパソコンに残ります。また遅くなったときだけ、もう一度試してください。<br>
+  ※ すべて「エラー」や「失敗」になるときは、学校のネットワークでAIへの通信が制限されている可能性があります。管理の先生に確認してください。「エラー429」は無料の利用上限に達した状態なので、しばらく（1日の上限なら翌日）待ってください。</span></div></div>
+ <div class="c"><h2>APIキーの作り方（無料・約2分）</h2><ol>
+  <li>パソコンで <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer"><b>https://aistudio.google.com/apikey</b></a> を開き、Googleアカウントでログインします。</li>
+  <li>「APIキーを作成」を押し、画面の案内に従って作成します（クレジットカードは不要です）。</li>
+  <li>表示された「AIza…」で始まるキーをコピーします。</li>
+  <li>上の入力欄に貼り付けて「保存」→「接続テスト」で「OK」と出れば完了です。</li></ol>
+  <div class="wn">キーは自分用です。他の人に見せたり、メールやチャットに貼ったりしないでください。このファイルを他の先生に渡すときも、キーは含まれません（各自が自分のキーを作ります）。</div></div>
+ <div class="c"><h2>無料枠の目安（変わることがあります）</h2>
+  <ul><li>無料枠には「1分あたりの回数」と「1日あたりの回数」の上限があり、目安は<b>1分に5〜15回、1日に100〜1,000回程度</b>です。モデルにより違い、Googleは過去に何度も変更しています。正確な上限は AI Studio の画面で確認してください。</li>
+  <li>このアプリは<b>1人＝1回</b>（4種類の文章をまとめて作成）。6秒間隔で順番に作るので、<b>35人で約5〜10分</b>が目安です。</li>
+  <li>上限に達したら止まります。時間をおいて「未作成の人だけ作成」を押すと続きから作ります（作成済みの人は飛ばします）。</li>
+  <li>無料枠で送った内容は、Googleのサービス改善に使われることがあります。</li></ul></div>
+ <div class="c"><h2>使い方（4ステップ）</h2><ol>
+  <li><b>① クラスを作る：</b>クラス名（例：3年1組）を入れてクラスを作ります。生徒は出席番号だけで管理します（氏名は入力しません）。</li>
+  <li><b>② 所見を入れる：</b>「生徒の追加・削除」で生徒を追加し、1年・2年の所見（前担任の指導要録）を入れます。Excelの列をまとめて貼ることもできます。</li>
+  <li><b>③ 文章を作る：</b>全員まとめて／チェックした人だけ／1人だけ、から選んで作ります。作った文章は「見る・直す」で手直しできます（自動保存）。</li>
+  <li><b>④ 出力する：</b>奈良・大阪・指導要録・クラス全項目を、Excel（見やすい形）・CSV・印刷で出力します。</li>
+  <li><b>⑤ 先生どうしで共有する（任意）：</b>設定の「リアルタイム共有」で、同じ学校の先生と同じ「共有コード」を入れて「共有を始める」を押します。ログインは不要で、入力した内容が同じコードの先生に自動で反映されます。コードは学校ごとに別のものにし、他校には教えないでください。</li></ol>
+  <div class="wn">⚠ 個人情報について：所見はGoogleのAIに送信されます。学校・教育委員会のルールで外部AIの利用が許されているか、必ず確認してください。出席番号だけの運用をおすすめします。所見に氏名・学校名を書かないでください。生成文は誤りを含む可能性があるため、必ず担任が確認してください。共有をオンにしない間は、データはこのブラウザ内にだけ保存されます（共有をオンにすると、Googleのサーバー（Firebase）にも保存され、同じ共有コードの先生と同期されます）。ファイルの置き場所やブラウザを変えると見えなくなることがあるので、④のExcelまたはCSVでこまめに保存してください。</div></div>
+ <div class="c"><h2>困ったときは</h2><ul>
+  <li><b>「接続テスト」でエラーが出る</b>：キーを貼り直してください（前後に空白が入らないように）。それでもだめなら、モデル名をAI Studioに表示されているものに変えてみてください。</li>
+  <li><b>「上限に達しました」と出る</b>：無料枠の回数制限です。しばらく待つか、翌日に「未作成の人だけ作る」を押すと、続きから作れます。</li>
+  <li><b>文章が似てしまう</b>：「AIへの指示」に書き方の希望を入れる、昨年度の指導要録を②に入れる、で変わります。1人だけ「作り直す」もできます。</li>
+  <li><b>所見の貼り付けがずれる</b>：Excelの列を、出席番号順に、空欄も含めて上から下まで選んでコピーしてください。途中の番号から貼るときは「◯番の生徒に入れる」の番号を変えます。</li>
+  <li><b>入力したデータが消えた</b>：別のブラウザやパソコンで開いていないか確認してください。また、ブラウザの閲覧データ（履歴・サイトデータ）を消すと、このアプリのデータも消えます。</li>
+  <li><b>共有がうまくいかない</b>：①「共有コード」が同じか確認（大文字・小文字・空白も同じにします）。②「権限がありません」と出たら、管理者がFirebaseの設定（匿名ログインとルール）を確認します。③「承認済みドメイン」のエラーが出たら、管理者がFirebaseの設定にこのURLを追加します。④通信が切れたときは、ページを読み込み直して「共有を始める」を押してください。</li>
+  <li><b>他の学校のデータが見えてしまう？</b>：共有コードが同じだと同じデータになります。学校ごとに別のコードにしてください。コードを変えると、別のデータとして扱われます。</li>
+  <li><b>個人情報が心配</b>：所見に氏名・学校名を書かないでください。外部AIを使ってよいかは、学校・教育委員会のルールを確認してください。</li></ul></div>`;
+}
+async function testK(){const t=$('at');S.key=$('ak').value.trim();S.model=$('am').value.trim()||'gemini-3.8-flash';save();t.textContent='確認中…';
+ try{await callAI('次のJSONだけ返してください：{"ok":"OK"}');t.textContent='OK：接続できました'}catch(e){t.textContent=errMsg(e)}}
+async function speedTest(){const t=$('at');S.key=$('ak').value.trim();if(!S.key){t.textContent='先にAPIキーを入れてください';return}
+ const ms=['gemini-3.1-flash-lite','gemini-3.5-flash','gemini-3.7-flash','gemini-3.8-flash'];const res=[];let best=null;
+ /* 順番に測り、今の最速より遅いモデルは途中で打ち切って飛ばす（最初のモデルは最大5秒待つ）。最速が出たらすぐモデル名欄に入れる */
+ const show=(cur)=>{t.innerHTML=res.map(x=>esc(x)).join('<br>')+(cur?'<br>'+esc(cur)+' を測定中…':'')};
+ for(const m of ms){show(m);const t0=Date.now();
+  try{const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),best?best.ms:5000);
+   const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':S.key},body:JSON.stringify({contents:[{parts:[{text:'日本語で100字程度の短い文章を書いてください。'}]}]}),signal:ctl.signal});
+   if(r.ok)await r.json();clearTimeout(to);const el=Date.now()-t0;
+   if(!r.ok){res.push(m+'：使えません（エラー'+r.status+'）')}
+   else if(!best||el<best.ms){best={m,ms:el};$('am').value=m;res.push(m+'：'+(el/1000).toFixed(1)+'秒 ← 今のところ最速（入力済み）')}
+   else res.push(m+'：'+(el/1000).toFixed(1)+'秒')}
+  catch(e){res.push(m+'：遅いので飛ばしました')}}
+ if(!best){t.innerHTML=res.map(x=>esc(x)).join('<br>')+'<br>測定できたモデルがありません。キーや通信を確認してください。';return}
+ t.innerHTML=res.map(x=>esc(x)).join('<br>')+'<br>最速は '+esc(best.m)+'（'+(best.ms/1000).toFixed(1)+'秒）です。モデル名の欄に入れました。「保存」を押すと反映されます。'}
+/* ③ */
+let ot='all';
+const TYPES={all:['クラス全項目',['ns','tk','sp','nt','os','yo'],['奈良 総合所見','奈良 特別活動の記録（委員会・係）','奈良 スポーツ・文化活動等の記録','奈良 特別活動（AI文章・参考）','大阪 活動/行動','指導要録']],
+ nara:['奈良県',['ns','tk','sp','nt'],['総合所見','特別活動の記録（委員会・係）','スポーツ・文化活動等の記録','特別活動（AI文章・参考）']],tk:['特別活動の記録',['tk'],['特別活動の記録（委員会・係）']],sp:['スポーツ・文化活動等の記録',['sp'],['スポーツ・文化活動等の記録']],
+osaka:['大阪府',['os'],['活動/行動の記録']],yo:['指導要録（3年）',['yo'],['総合所見']]};
+function t3(){
+ if(!S.mode||!S.classes.length){$('main').innerHTML='<div class="c">先にクラスを作成してください。</div>';return}
+ if(!cls())S.cur=S.classes[0].id;const c=cls(),T=TYPES[ot];
+ const head=(S.mode==='name'?['番号','氏名']:['番号']).concat(T[2]);
+ const rows=c.students.map(s=>(S.mode==='name'?[s.no,s.name]:[s.no]).concat(T[1].map(k=>val(s,k))));
+ window._exAB=null;window._ex={head,rows,title:`${c.name} ${T[0]}`};
+ $('main').innerHTML=`<div class="c"><div class="r"><select onchange="S.cur=this.value;save();draw()">${S.classes.map(x=>`<option value="${x.id}" ${x.id===S.cur?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
+  ${Object.entries(TYPES).map(([k,v])=>`<button class="${ot===k?'on':''}" onclick="ot='${k}';draw()">${v[0]}</button>`).join('')}</div>
+  <div class="r"><button class="p" onclick="doPrint()">印刷</button><button class="p" onclick="doXlsx()">Excelでダウンロード（見やすい）</button><button onclick="doCsv()">CSVダウンロード</button></div>
+  <div class="mu"><div class="mu" style="margin-top:6px"><b>上のボタンの違い</b><br>・クラス全項目：すべての項目を1つの表にまとめます。／奈良県：総合所見＋特別活動の記録＋スポーツ・文化活動等の記録。／特別活動の記録、スポーツ・文化活動等の記録：②で選択して入れた内容だけを、それぞれ単独で出力。／大阪府：活動/行動の記録。／指導要録：3年の総合所見。<br>・Excelでダウンロード：セル内で折り返し、列の幅も整えた見やすいExcelファイル。<br>・CSVダウンロード：データだけのファイル（Excelで文字化けしません）。<br>・印刷：下の表をそのまま印刷します（PDF保存もできます）。<br>・校務システムや提出用のExcelに入れるときは、出力した表の該当する列をコピーして貼り付けてください（番号順に並んでいます）。${S.mode==='num'?'<br>・出席番号だけの設定なので、氏名は含まれません。':''}</div></div>
+ <div class="c tw">${tbl()}</div>`;
+}
+function tbl(){const e=window._ex2||window._ex;return `<h2>${esc(e.title)}</h2><table><tr>${e.head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr>${e.rows.map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</table>`}
+function doPrint(){window._ex2=getEx();$('pa').innerHTML=tbl();window._ex2=null;window.print()}
+
+/* ⑤ 出席日数（進路用）：校務支援システムの月別出欠表を貼り付け→期間(1〜3年)を指定して合計 */
+const FY=[4,5,6,7,8,9,10,11,12,1,2,3];
+const AF=['j','t','m','k','s','l','e'];
+const AH=['授業日数','出席停止・忌引等','出席しなければならない日数','欠席日数','出席日数','遅刻日数','早退日数'];
+let attMsg='';
+const attLb=i=>i<2?`${i+1}年（年間）`:`3年${FY[i-2]}月`;
+function attData(c){
+ if(!c.atty){
+  c.atty={1:{},2:{},3:{}};
+  if(c.att){const o={};for(const m in c.att){o[m]={};for(const n in c.att[m])o[m]['n'+n]=Object.assign({no:+n,id:''},c.att[m][n])}c.atty[3]=o;delete c.att}
+ }
+ [1,2].forEach(g=>{const o=c.atty[g],mk=Object.keys(o).filter(k=>k!=='all');
+  if(mk.length){const t=o.all||(o.all={});mk.forEach(m=>{Object.entries(o[m]).forEach(([k,x])=>{const e=t[k];if(!e)t[k]=Object.assign({},x);else AF.forEach(f=>e[f]+=x[f])});delete o[m]})}});
+ return c.atty;
+}
+function attIdx(c){const d=attData(c),o=[];[1,2].forEach(g=>{if(d[g].all&&Object.keys(d[g].all).length)o.push(g-1)});FY.forEach((m,k)=>{if(d[3][m])o.push(2+k)});return o}
+function attParse(t){
+ const out=[];let skip=0,bad=0;const I=/^\d+$/;
+ parseRows(t).forEach(r=>{
+  const raw=r.map(x=>String(x??'').trim()),z=raw.map(x=>x.normalize('NFKC')),ok=(a,n)=>z.slice(a,a+n).every(x=>I.test(x));
+  const cons=a=>{const w=z.slice(a,a+5).map(Number);return w[0]-w[1]===w[2]&&w[2]-w[3]===w[4]};
+  let i=-1,f=-1,n=7;
+  for(let a=0;a+6<z.length;a++){if(ok(a,7)){if(f<0)f=a;if(cons(a)){i=a;break}}}
+  if(i<0){n=5;for(let a=0;a+4<z.length;a++){if(ok(a,5)&&cons(a)){i=a;break}}}
+  if(i<0&&f>=0){i=f;n=7}
+  if(i<0){skip++;return}
+  let p;
+  if(n===7){p=0;while(p<i&&!I.test(z[p]))p++;if(p>=i){skip++;return}}
+  else{p=i-1;while(p>=0&&!z[p])p--}
+  const v=z.slice(i,i+n).map(Number);
+  if(v[0]-v[1]!==v[2]||v[2]-v[3]!==v[4])bad++;
+  if(n===7){
+   const ex=z.slice(p+1,i).filter(x=>I.test(x));
+   out.push({no:+z[p],id:ex.length>=2?ex[0]:'',j:v[0],t:v[1],m:v[2],k:v[3],s:v[4],l:v[5],e:v[6],r:raw.slice(i+7).filter(Boolean).join(' ')});
+  }else{
+   out.push({no:(p>=0&&I.test(z[p]))?+z[p]:null,id:'',j:v[0],t:v[1],m:v[2],k:v[3],s:v[4],l:0,e:0,nl:1,r:raw[i+5]||''});
+  }
+ });
+ let seq=false;
+ if(out.length&&out.every(x=>x.no===null)){out.forEach((x,k)=>x.no=k+1);seq=true}
+ else{const keep=out.filter(x=>x.no!==null);skip+=out.length-keep.length;out.length=0;keep.forEach(x=>out.push(x))}
+ return {out,n:out.length,skip,bad,seq};
+}
+function attPrev(){
+ const m=$('atm');if(!m)return;const t=$('atx').value;
+ if(!t.trim()){m.innerHTML='';return}
+ const q=attParse(t),k=q.out.map(x=>x.no).sort((a,b)=>a-b),f=q.out[0];
+ m.innerHTML=q.n?`✔ ${q.n}人分を読み取りました（${k[0]}番〜${k[k.length-1]}番）。1人目の例：${f.no}番　授業${f.j}日・欠席${f.k}日・出席${f.s}日`
+   +(q.seq?`<br><span class="mu">※番号の列がないので、上から順に1番、2番…として読み取りました。今のクラスの出席番号と順番が同じか確認してください</span>`:'')
+   +(new Set(q.out.map(x=>x.j)).size>1?`<br><b style="color:var(--dg)">⚠ 授業日数が違う行があります（${[...new Set(q.out.map(x=>x.j))].join('・')}）。別クラス・別学年の表が混ざっていませんか？</b>`:'')
+   +(q.skip?`<span class="mu">（見出しなど${q.skip}行は読み飛ばしました）</span>`:'')
+   +(q.out.some(x=>x.nl)?`<br><span class="mu">※遅刻・早退の列がない形式として読み取りました（遅刻・早退は0扱い）。備考も一緒にコピーすると、備考欄に入ります</span>`:q.out.some(x=>!x.id)?`<br><span class="mu">※個人IDが読み取れない行があります。学年をまたぐ合算は出席番号で行います</span>`:'')
+   +(q.bad?`<br><b style="color:var(--dg)">⚠ 数字の計算が合わない行が${q.bad}行あります。列が足りない・ずれていないか確認してください</b>`:'')
+  :'<b style="color:var(--dg)">読み取れませんでした。生徒の行（番号〜最後の列）を含めてコピーし直してください</b>';
+}
+function attApply(){
+ const c=cls(),d=attData(c),g=+$('atg').value,q=attParse($('atx').value);
+ if(!q.n){alert('読み取れる行がありません');return}
+ if(g===3){
+  const m=+$('atmon').value;
+  if(d[3][m]&&!confirm(`3年${m}月はすでに入力済みです。上書きしますか？`))return;
+  d[3][m]={};q.out.forEach(x=>{d[3][m]['n'+x.no]=x});
+  S.ag=3;S.am=FY[(FY.indexOf(m)+1)%12];attMsg=`✔ 3年${m}月分（${q.n}人）を保存しました`;
+ }else{
+  const t={};
+  q.out.forEach(x=>{const k=x.id||'n'+x.no,o=t[k];if(!o)t[k]=Object.assign({},x);else{AF.forEach(f=>o[f]+=x[f]);if(x.r)o.r=[o.r,x.r].filter(Boolean).join(' ')}});
+  if(q.seq){if(d[g].all&&Object.keys(d[g].all).length&&!confirm(`${g}年（年間）はすでに入力済みです。上書きしますか？`))return;d[g].all=t}
+  else Object.assign(d[g].all||(d[g].all={}),t);
+  const e=d[g].all;
+  S.ag=g;attMsg=`✔ ${g}年（年間）に${Object.keys(t).length}人分を追加しました（合計${Object.keys(e).length}人）。別クラスを続けて貼れます`;
+ }
+ save();draw();
+}
+function attDel(g,m){if(!confirm(g<3?`${g}年（年間）のデータをすべて削除しますか？`:`3年${m}月のデータを削除しますか？`))return;const d=attData(cls());if(g<3)delete d[g].all;else delete d[3][m];save();draw()}
+function attCalc(c,a,b){
+ const d=attData(c),idx=attIdx(c).filter(i=>i>=a&&i<=b);
+ const R={idx,rows:[],gs:[],ref:0,hasId:true,warnNo:false,skip:0,noLE:false,lowId:false};
+ if(!idx.length)return R;
+ const gOf=i=>i<2?i+1:3,recs=i=>i<2?d[i+1].all:d[3][FY[i-2]],gs=[...new Set(idx.map(gOf))],ref=Math.max(...gs);
+ const refRecs=[];idx.filter(i=>gOf(i)===ref).forEach(i=>Object.values(recs(i)).forEach(x=>refRecs.push(x)));
+ if(ref===3)FY.forEach(m=>{const o=d[3][m];if(o)Object.values(o).forEach(x=>refRecs.push(x))});
+ const idMap={};refRecs.forEach(x=>{if(x.id)idMap[x.id]=x.no});
+ const hasId=Object.keys(idMap).length>0,refNos=new Set(refRecs.map(x=>x.no)),acc={},sk=new Set();
+ idx.forEach(i=>{
+  const g=gOf(i),lb=g<3?g+'年':(gs.length>1?'3年'+FY[i-2]+'月':FY[i-2]+'月');
+  Object.values(recs(i)).forEach(x=>{
+   let no;
+   if(x.nl)R.noLE=true;
+   if(g!==ref&&x.id)R.lowId=true;
+   if(g===ref)no=x.no;
+   else if(x.id&&idMap[x.id]!==undefined)no=idMap[x.id];
+   else if(x.id&&hasId){sk.add(x.id);return}
+   else if(refNos.has(x.no)){no=x.no;R.warnNo=true}
+   else{sk.add(x.id||g+'-'+x.no);return}
+   const o=acc[no]||(acc[no]={t:AF.map(()=>0),k:0,rm:[]});
+   AF.forEach((f,j)=>o.t[j]+=x[f]);o.k++;if(x.r)o.rm.push(lb+':'+x.r);
+  });
+ });
+ R.gs=gs;R.ref=ref;R.hasId=hasId;R.skip=sk.size;
+ R.rows=Object.keys(acc).map(Number).sort((x,y)=>x-y).map(n=>({no:n,...acc[n]}));
+ return R;
+}
+let attPend=false;
+function attRange(x,y){S.aa=x;S.ab=y;attPend=false;save();draw()}
+function attPick(i){if(!attPend){S.aa=S.ab=i;attPend=true}else{const p=S.aa;S.aa=Math.min(p,i);S.ab=Math.max(p,i);attPend=false}save();draw()}
+function attRowsOf(c,a,b){if(a>b)return[];const R=attCalc(c,a,b),nm=S.mode==='name'?2:1,nameOk=nm===2&&R.ref===3;
+ return R.rows.map(o=>{const st=nameOk?c.students.find(x=>x.no===o.no):null;return(nm===2?[o.no,st?st.name:'']:[o.no]).concat(o.t,[o.k+'/'+R.idx.length,o.rm.join('\n')])})}
+function getEx(){const e=window._ex;if(S.aout!=='all'||!window._exAB)return e;const ab=window._exAB,rows=[];
+ S.classes.forEach(c=>attRowsOf(c,ab[0],ab[1]).forEach(r=>rows.push([c.name].concat(r))));
+ return{head:['クラス'].concat(e.head),rows,title:`全クラス 出席日数 ${attLb(ab[0])}〜${attLb(ab[1])}`,nm:e.nm+1,nums:e.nums.map(x=>x+1),w:[10].concat(e.w),cls:true}}
+function tAtt(){
+ if(!S.classes.length){$('main').innerHTML='<div class="c big">先に「① クラスを作る」でクラスを作ってください。<div class="r"><button class="p" onclick="go(0)">① クラスを作る へ</button></div></div>';return}
+ if(!cls())S.cur=S.classes[0].id;
+ const c=cls(),d=attData(c),have=attIdx(c),am=S.am||(new Date().getMonth()+1),ag=S.ag||3;
+ const a=S.aa??(have[0]??0),b=S.ab??(have[have.length-1]??13);
+ const mopt=v=>FY.map(m=>`<option value="${m}" ${m===v?'selected':''}>${m}月</option>`).join('');
+ const ropt=v=>[...Array(14).keys()].map(i=>`<option value="${i}" ${i===v?'selected':''}>${have.includes(i)?'● ':''}${attLb(i)}</option>`).join('');
+ const rng=a<=b?[...Array(b-a+1).keys()].map(i=>a+i):[],miss=rng.filter(i=>!have.includes(i));
+ const R=a<=b?attCalc(c,a,b):{idx:[],rows:[],gs:[],ref:0,hasId:true,warnNo:false,skip:0,noLE:false,lowId:false};
+ const nm=S.mode==='name'?2:1,nameOk=nm===2&&R.ref===3;
+ const head=(nm===2?['番号','氏名']:['番号']).concat(AH,['入力数','備考']);
+ const rows=R.rows.map(o=>{
+  const st=nameOk?c.students.find(x=>x.no===o.no):null;
+  return (nm===2?[o.no,st?st.name:'']:[o.no]).concat(o.t,[o.k+'/'+R.idx.length,o.rm.join('\n')]);
+ });
+ const title=`${c.name} 出席日数 ${attLb(a)}〜${attLb(b)}`;
+ window._exAB=[a,b];window._ex={head,rows,title,nm:nm+8,nums:[...Array(7).keys()].map(i=>nm+i),w:(nm===2?[7,14]:[7]).concat([10,16,16,10,10,10,10,10,50])};
+ const ci=nm+7,multi=R.gs.length>1;
+ $('main').innerHTML=`
+ <div class="c"><div class="r" style="margin:0"><b>クラス：</b>${clsSel()}<span class="mu">校務支援システムの「通知表 → 出欠の記録」を1・2年は年間分を一括、3年は月ごとに貼り付けて、期間を指定して合計します。氏名は保存しません。</span></div></div>
+ <div class="c"><h2>① 月ごとに貼り付ける</h2>
+  <div class="stp"><span class="no">①</span><b>校務支援システムで学年・クラス・月を選び、表をコピー</b>
+   <div class="mu">「データ反映」後の表を、最初の生徒から最後の生徒までドラッグして選択し、Ctrl+C。チェック欄・氏名・個人ID・年度などの列があっても、そのまま貼れます（最初の数字を出席番号、授業日数〜早退日数の7列を自動で探します。氏名は読み取りません）。</div></div>
+  <div class="stp"><span class="no">②</span><b>何年生の何月分ですか？</b>
+   <div class="r"><select id="atg" onchange="S.ag=+this.value;save();$('atmw').style.display=this.value==='3'?'':'none'">${[1,2,3].map(g=>`<option value="${g}" ${g===ag?'selected':''}>${g}年</option>`).join('')}</select><span id="atmw" style="${ag===3?'':'display:none'}"><select id="atmon" onchange="S.am=+this.value;save()">${mopt(am)}</select></span></div>
+   <div class="mu">※<b>1・2年は月を選ばず、1年間の合計の表を一括で</b>貼ります。今のクラスの生徒の表（授業日数・出席停止・出席しなければならない日数・欠席日数・出席日数、あれば備考）をコピーすれば読めます。<b>番号の列がなければ、上から順に1番、2番…</b>として読み取り、その学年を置き換えます（番号つきの表なら別クラスを続けて貼って「追加」もできます）。同じ人が複数行（月ごとなど）あれば自動で合算します。3年は月ごとに貼ります（貼るたびにその月を上書き）。</div></div>
+  <div class="stp"><span class="no">③</span><b>ここに貼り付け（Ctrl+V）</b>
+   <textarea id="atx" style="min-height:100px" placeholder="ここに貼り付け" oninput="attPrev()"></textarea><div class="mu" id="atm"></div></div>
+  <div class="stp"><span class="no">④</span><b>ボタンを押す</b><div class="r"><button class="p" onclick="attApply()">保存</button><span class="mu">${attMsg}</span></div></div>
+  <div class="mu" style="margin-top:6px"><b>保存済みの月</b>（×でその月を削除）</div>
+  ${[1,2].map(g=>{const o=d[g].all;return `<div style="margin:2px 0"><b>${g}年</b> ${o&&Object.keys(o).length?`<span class="tag ok" style="display:inline-block;margin:2px">年間（${Object.keys(o).length}人・授業${Object.values(o)[0].j}日） <a href="#" onclick="attDel(${g},0);return false" style="text-decoration:none">×</a></span>`:'<span class="tag no" style="display:inline-block;margin:2px">年間 未</span>'}</div>`}).join('')}
+  <div style="margin:2px 0"><b>3年</b> ${FY.map(m=>{const o=d[3][m];return o?`<span class="tag ok" style="display:inline-block;margin:2px">${m}月（${Object.keys(o).length}人・授業${Object.values(o)[0].j}日） <a href="#" onclick="attDel(3,${m});return false" style="text-decoration:none">×</a></span>`:`<span class="tag no" style="display:inline-block;margin:2px">${m}月 未</span>`}).join('')}</div></div>
+ <div class="c"><h2>② 期間を指定して合計</h2>
+  <div class="stp"><span class="no">①</span><b>よく使う期間（ワンタッチ）</b>
+   <div class="r">${[['1年だけ',0,0],['2年だけ',1,1],['3年だけ（4月〜3月）',2,13],['1〜3年ぜんぶ',0,13],['3年 前半（4〜9月）',2,7],['3年 後半（10〜3月）',8,13]].map(p=>`<button class="${a===p[1]&&b===p[2]?'on':''}" onclick="attRange(${p[1]},${p[2]})">${p[0]}</button>`).join('')}</div></div>
+  <div class="stp"><span class="no">②</span><b>または、はじめ→おわりの順に押して選ぶ</b>
+   <div class="r" style="gap:4px">${[...Array(14).keys()].map(i=>`${i===2?'<span class="mu">｜3年</span>':''}<button class="chip ${i>=a&&i<=b?'on':(have.includes(i)?'has':'')}" onclick="attPick(${i})">${i<2?(i+1)+'年':FY[i-2]+'月'}${have.includes(i)?'':'<br><span style="font-size:10px">未</span>'}</button>`).join('')}</div>
+   <div class="mu">${attPend?'👉 次に「おわり」を押してください（1か所だけなら、もう一度同じところを押します）':'選んでいる期間：<b>'+attLb(a)+'〜'+attLb(b)+'</b>　（濃い青＝選択中／薄い青＝データあり／「未」＝まだ貼り付けていない）。1・2年は年間の合計です。'}</div></div>
+  <div class="stp"><span class="no">③</span><b>出力する</b>
+   <div class="r"><label><input type="radio" name="aout" ${S.aout==='all'?'':'checked'} onchange="S.aout='one';save();draw()"> このクラスだけ（${esc(c.name)}）</label><label><input type="radio" name="aout" ${S.aout==='all'?'checked':''} onchange="S.aout='all';save();draw()"> 全クラスまとめて（${S.classes.length}クラス）</label></div>
+   <div class="r"><button class="p" onclick="doPrint()" ${rows.length?'':'disabled'}>印刷</button><button class="p" onclick="doXlsx()" ${rows.length?'':'disabled'}>Excel</button><button onclick="doCsv()" ${rows.length?'':'disabled'}>CSV</button></div>
+   ${S.aout==='all'?'<div class="mu">全クラスの出力は、先頭に「クラス」の列がつき、データのあるクラスが続けて並びます。下の表は今のクラスのプレビューです。</div>':''}</div>
+  ${a>b?'<div class="wn">「から」が「まで」より後になっています。</div>':''}
+  ${miss.length&&a<=b?`<div class="wn">この期間のうち、まだ貼り付けていないところ：<b>${miss.map(attLb).join('、')}</b>（合計には入っていません）</div>`:''}
+  ${multi&&!R.hasId&&R.lowId?`<div class="wn">${R.ref}年のデータに個人IDがありません（個人IDつきの形式になる前の貼り付け分）。${R.ref}年の各月をもう一度貼り直すと、学年をまたいで正しく合算できます。今は出席番号が同じ人どうしで合算しています。</div>`:''}
+  ${multi&&R.warnNo?'<div class="mu">個人IDのない表（1・2年など）は、今の出席番号が同じ人どうしで合算しています。番号がずれていないか確認してください。</div>':''}
+  ${R.noLE?'<div class="mu">遅刻・早退の列がない表は0として入っています（遅刻・早退の合計は、その列のある表の分だけです）。</div>':''}
+  ${multi&&R.skip?`<div class="mu">${R.ref}年のデータに対応しない${R.skip}人分（他クラスや転出など）は、表に出していません。</div>`:''}
+  ${rows.length?`<div class="mu">${attLb(a)}〜${attLb(b)}（入力済み ${R.idx.length}件）の合計です。番号は${R.ref}年の出席番号。「入力数」は1・2年が年間で1件、3年が月ごとに1件。少ない人は、貼り忘れのクラスや転入・転出でデータがありません。</div>
+  <div style="overflow-x:auto;margin-top:6px"><table><tr>${head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map((v,j)=>{
+    const ctr=j===0||(j>=nm&&j<=ci),bad=j===ci&&r[ci].split('/')[0]!==r[ci].split('/')[1];
+    return `<td style="${ctr?'text-align:center;':''}${bad?'color:var(--dg);font-weight:700;':''}${j===nm+3&&+v>0?'font-weight:700;':''}">${esc(v).replace(/\n/g,'<br>')}</td>`}).join('')}</tr>`).join('')}</table></div>`
+  :'<div class="mu" style="margin-top:6px">月を貼り付けて保存すると、ここに合計が出ます。</div>'}</div>`;
+}
+
+/* xlsx */
+const _crcT=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=_crcT[(c^b[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+function zipStore(files){
+ const enc=new TextEncoder(),parts=[],cen=[];let off=0;
+ const u16=v=>[v&255,v>>8&255],u32=v=>[v&255,v>>8&255,v>>16&255,v>>>24&255];
+ for(const [name,txt] of files){
+  const nb=enc.encode(name),db=enc.encode(txt),crc=crc32(db);
+  const lh=new Uint8Array([0x50,0x4b,3,4,...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0x21),...u32(crc),...u32(db.length),...u32(db.length),...u16(nb.length),...u16(0)]);
+  parts.push(lh,nb,db);
+  cen.push(new Uint8Array([0x50,0x4b,1,2,...u16(20),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0x21),...u32(crc),...u32(db.length),...u32(db.length),...u16(nb.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(off)]),nb);
+  off+=lh.length+nb.length+db.length;
+ }
+ const cl=cen.reduce((a,b)=>a+b.length,0);
+ const end=new Uint8Array([0x50,0x4b,5,6,...u16(0),...u16(0),...u16(files.length),...u16(files.length),...u32(cl),...u32(off),...u16(0)]);
+ return new Blob([...parts,...cen,end],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+function xlsxBlob(e,sheetName){
+ const X=v=>String(v??'').replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+ const nm=e.nm??(S.mode==='name'?2:1),W=e.w||e.head.map((h,i)=>i<nm?(i===0?7:14):60),L=i=>String.fromCharCode(65+i);
+ const tc=(r,c,v,st)=>`<c r="${L(c)}${r}" s="${st}" t="inlineStr"><is><t xml:space="preserve">${X(v)}</t></is></c>`;
+ let rows=`<row r="1" ht="30" customHeight="1">${e.head.map((h,c)=>tc(1,c,h,1)).join('')}</row>`;
+ e.rows.forEach((row,i)=>{const r=i+2;let n=1;
+  row.forEach((v,c)=>{if(c>=nm){const cpl=Math.floor(W[c]/2.15);let k=0;String(v||'').split('\n').forEach(l=>k+=Math.max(1,Math.ceil(l.length/cpl)));n=Math.max(n,k)}});
+  rows+=`<row r="${r}" ht="${Math.min(409,n*19+8)}" customHeight="1">${row.map((v,c)=>((c===0&&!e.cls)||e.nums?.includes(c))?`<c r="${L(c)}${r}" s="3"><v>${+v||0}</v></c>`:tc(r,c,v,c<nm?3:2)).join('')}</row>`});
+ const M='xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"',H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+ const sheet=`${H}<worksheet ${M}><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${W.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${rows}</sheetData><pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>`;
+ const B='<border><left style="thin"><color rgb="FF999999"/></left><right style="thin"><color rgb="FF999999"/></right><top style="thin"><color rgb="FF999999"/></top><bottom style="thin"><color rgb="FF999999"/></bottom><diagonal/></border>';
+ const styles=`${H}<styleSheet ${M}><fonts count="2"><font><sz val="11"/><name val="游ゴシック"/></font><font><b/><sz val="11"/><name val="游ゴシック"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFDCE6F1"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>${B}</borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="top" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+ const R='http://schemas.openxmlformats.org/officeDocument/2006/relationships',P='http://schemas.openxmlformats.org/package/2006/relationships';
+ return zipStore([
+  ['[Content_Types].xml',`${H}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`],
+  ['_rels/.rels',`${H}<Relationships xmlns="${P}"><Relationship Id="rId1" Type="${R}/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
+  ['xl/workbook.xml',`${H}<workbook ${M} xmlns:r="${R}"><sheets><sheet name="${X(sheetName)}" sheetId="1" r:id="rId1"/></sheets></workbook>`],
+  ['xl/_rels/workbook.xml.rels',`${H}<Relationships xmlns="${P}"><Relationship Id="rId1" Type="${R}/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="${R}/styles" Target="styles.xml"/></Relationships>`],
+  ['xl/styles.xml',styles],['xl/worksheets/sheet1.xml',sheet]]);
+}
+function doXlsx(){
+ const e=getEx(),sn=e.title.replace(/[\[\]:*?\/\\]/g,'').slice(0,31)||'Sheet1';
+ const a=document.createElement('a');a.href=URL.createObjectURL(xlsxBlob(e,sn));
+ a.download=e.title.replace(/\s+/g,'_')+'.xlsx';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function doCsv(){
+ const e=getEx(),q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+ const csv='\uFEFF'+[e.head].concat(e.rows).map(r=>r.map(q).join(',')).join('\r\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+ a.download=e.title.replace(/\s+/g,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+draw();
+</script></body></html>
